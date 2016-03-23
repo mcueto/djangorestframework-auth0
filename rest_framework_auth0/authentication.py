@@ -8,7 +8,7 @@ from rest_framework.authentication import (
 )
 from rest_framework_jwt.compat import get_user_model
 from rest_framework_jwt.settings import api_settings as jwt_api_settings
-from djangorestframework_auth0.settings import api_settings
+from rest_framework_auth0.settings import api_settings
 
 from rest_framework_jwt.authentication import BaseJSONWebTokenAuthentication
 
