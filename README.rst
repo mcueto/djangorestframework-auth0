@@ -9,6 +9,13 @@ This library let you to login an specific user based on the JWT Token returned b
 
 Detailed documentation is in the "docs" directory.
 
+Installation
+-----------
+
+1. Using `pip` install the library cloning the repository with following command::
+
+    pip install -e git+https://github.com/mcueto/djangorestframework-auth0.git#egg=djangorestframework_auth0
+
 Quick start
 -----------
 
