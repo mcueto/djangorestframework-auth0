@@ -12,20 +12,30 @@ Detailed documentation is in the "docs" directory.
 Quick start
 -----------
 
-
-1. Add "djangorestframework-auth0" to your INSTALLED_APPS setting like this::
+1. Add "django.contrib.auth to INSTALLED_APPS settings like this::
 
     INSTALLED_APPS = [
         ...
+        'django.contrib.auth',
+        ...
+    ]
+
+This will allow us to login as an specific user as well as auto-creating users when they don't exist
+
+1. Add "djangorestframework-auth0" to your INSTALLED_APPS **after** `rest_framework_jwt` setting like this::
+
+    INSTALLED_APPS = [
+        ...,
+        'rest_framework_jwt',
         'djangorestframework-auth0',
     ]
 
 2. Add `Auth0JSONWebTokenAuthentication` in your DEFAULT_AUTHENTICATION_CLASSES located at settings.py from your project::
 
     REST_FRAMEWORK = {
-        ..,
+        ...,
         'DEFAULT_AUTHENTICATION_CLASSES': (
-            ..,
+            ...,
             'djangorestframework_auth0.authentication.Auth0JSONWebTokenAuthentication',
         ),
     }
