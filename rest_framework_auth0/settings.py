@@ -4,7 +4,7 @@ import base64
 from django.conf import settings
 from rest_framework.settings import APISettings
 from rest_framework_jwt.settings import api_settings as jwt_settings
-from djangorestframework_auth0.utils import auth0_get_username_from_payload_handler
+from rest_framework_auth0.utils import auth0_get_username_from_payload_handler
 
 
 USER_SETTINGS = getattr(settings, 'AUTH0', None)

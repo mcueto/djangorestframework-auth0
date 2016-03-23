@@ -14,7 +14,7 @@ Installation
 
 1. Using `pip` install the library cloning the repository with following command::
 
-    pip install -e git+https://github.com/mcueto/djangorestframework-auth0.git#egg=djangorestframework_auth0
+    pip install -e git+https://github.com/mcueto/djangorestframework-auth0.git#egg=rest_framework_auth0
 
 Quick start
 -----------
@@ -43,7 +43,7 @@ This will allow us to login as an specific user as well as auto-creating users w
         ...,
         'DEFAULT_AUTHENTICATION_CLASSES': (
             ...,
-            'djangorestframework_auth0.authentication.Auth0JSONWebTokenAuthentication',
+            'rest_framework_auth0.authentication.Auth0JSONWebTokenAuthentication',
         ),
     }
 
