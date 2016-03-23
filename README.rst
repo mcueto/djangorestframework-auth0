@@ -12,20 +12,47 @@ Detailed documentation is in the "docs" directory.
 Quick start
 -----------
 
-
-1. Add "djangorestframework-auth0" to your INSTALLED_APPS setting like this::
+1. Add "django.contrib.auth to INSTALLED_APPS settings like this::
 
     INSTALLED_APPS = [
         ...
+        'django.contrib.auth',
+        ...
+    ]
+
+This will allow us to login as an specific user as well as auto-creating users when they don't exist
+
+1. Add "djangorestframework-auth0" to your INSTALLED_APPS **after** `rest_framework_jwt` setting like this::
+
+    INSTALLED_APPS = [
+        ...,
+        'rest_framework_jwt',
         'djangorestframework-auth0',
     ]
 
-2. Add your AUTH0_CLIENT_SECRET and AUTH0_CLIENT_ID in your settings.py file
+2. Add `Auth0JSONWebTokenAuthentication` in your DEFAULT_AUTHENTICATION_CLASSES located at settings.py from your project::
 
-3. Add the `Authorization` Header to all of your REST API request, prefixing JWT to your token::
+    REST_FRAMEWORK = {
+        ...,
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            ...,
+            'djangorestframework_auth0.authentication.Auth0JSONWebTokenAuthentication',
+        ),
+    }
 
-    `Authorization: JWT <YOUR_TOKEN>`
+3. Add your AUTH0_CLIENT_SECRET and AUTH0_CLIENT_ID in your settings.py file -must be the same secret and id than the frontend App-::
 
-4. Use the decorator `@token_required` in all views you want to protect (not_ready_yet)
+    AUTH0 = {
+        'AUTH0_CLIENT_ID':'<YOUR_AUTH0_CLIENT_ID>',
+        'AUTH0_CLIENT_SECRET':'<YOUR_AUTH0_CLIENT_SECRET>',
+        'AUTH0_ALGORITHM':'HS256', #default used in Auth0 apps
+        'JWT_AUTH_HEADER_PREFIX': 'JWT', #default prefix used by djangorestframework_jwt
+    }
 
-5. That's it
+4. Add the `Authorization` Header to all of your REST API request, prefixing JWT to your token::
+
+    Authorization: JWT <AUTH0_GIVEN_TOKEN>
+
+5. Use the decorator `@token_required` in all views you want to protect (not_ready_yet)
+
+6. That's it
