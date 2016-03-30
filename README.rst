@@ -2,7 +2,7 @@
 djangorestframework-auth0
 =====
 
-Warning::
+Warning
 -------
 
     **This library is in an early stage of development**, when i finish the first "stable" version, i will add it to pip and register the first release to github
