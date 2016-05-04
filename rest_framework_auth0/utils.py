@@ -5,14 +5,6 @@ import jwt
 from rest_framework import exceptions
 from django.utils.encoding import smart_text
 from rest_framework_jwt.settings import api_settings as jwt_api_settings
-# from rest_framework_auth0.settings import api_settings
-# from rest_framework_auth0 import settings as api_settings
-
-# jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
-# from rest_framework_auth0.settings import api_settings
-
-# print(dir(api_settings))
-# print(dir(api_settings.jwt_settings.defaults))
 
 #copy if neccesary(review if import or just copy)
 def jwt_decode_handler(token):
@@ -87,7 +79,7 @@ def validate_role_from_payload(payload, role):
 #GROUPS
 
 def get_group_from_payload(payload):
-    group = get_app_metadata_from_payload(payload)["group"]
+    group = get_app_metadata_from_payload(payload)["groups"]
 
     return group
 

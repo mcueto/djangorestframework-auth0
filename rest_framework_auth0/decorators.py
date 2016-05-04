@@ -13,15 +13,11 @@ def json_response(response_dict, status=200):
 """
 TODO: Verify if the token is valid and not expired(need to decode before verify)
 """
-#
-# from functools import wraps
-# from django.utils.decorators import available_attrs, decorator_from_middleware
 
 from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from functools import wraps
 from rest_framework import exceptions
-# from rest_framework_auth0.authentication import get_jwt_value
 from rest_framework_auth0.utils import get_jwt_value, get_role_from_payload, jwt_decode_handler
 
 class token_required(object):
