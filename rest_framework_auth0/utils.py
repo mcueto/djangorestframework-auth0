@@ -54,10 +54,22 @@ def get_jwt_value(request):
 
     return auth[1]
 
+def get_app_metadata_from_payload(payload):
+    app_metadata = payload.get('app_metadata')
+
+    return app_metadata
+
+def get_user_metadata_from_payload(payload):
+    user_metadata = payload.get('user_metadata')
+
+    return user_metadata
+
+
 #ROLES
 
 def get_role_from_payload(payload):
-    roles = payload.get('roles')
+
+    roles = get_app_metadata_from_payload(payload)["roles"]
 
     return roles
 
@@ -75,7 +87,7 @@ def validate_role_from_payload(payload, role):
 #GROUPS
 
 def get_group_from_payload(payload):
-    group = payload.get('group')
+    group = get_app_metadata_from_payload(payload)["group"]
 
     return group
 

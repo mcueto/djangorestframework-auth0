@@ -95,9 +95,9 @@ class with_role(object):
 
         try:
             payload = jwt_decode_handler(jwt)
-            # print(payload)
+
             roles = get_role_from_payload(payload)
-            
+
             if(len(roles)>0):
                 # get called view
                 response = self.view_func(request, *args, **kwargs)
@@ -111,76 +111,3 @@ class with_role(object):
         # maybe do something after the view_func call
         # print ("----bye")
         return response
-
-
-def my_decorator(func):
-    def wrapper():
-        print ("----hello")
-        func()
-        print ("----bye")
-
-    return wrapper
-
-
-# def test(func):
-#
-#     def decorator(request, *args, **kwargs):
-#         # print(request)
-#         # print(dir(request))
-#
-#         if request.method == 'OPTIONS':
-#             return func(request, *args, **kwargs)
-#         auth_header = request.META.get('HTTP_AUTHORIZATION', None)
-#
-#         if auth_header is not None:
-#             tokens = auth_header.split(' ')
-#             if len(tokens) == 2 and tokens[0] == api_settings.JWT_AUTH_HEADER_PREFIX :
-#                 token = tokens[1]
-#                 # print(func)
-#                 # print(dir(func))
-#
-#                 return func
-#                 # return json_response({
-#                 # 'data': 'Correcto'
-#                 # }, status=200)
-#
-#                 # return Response({}, status=200)
-#                 # return json_response({
-#                 # }, status=200)
-#
-#                 # print(token)
-#                 # try:
-#                 #     request.token = Token.objects.get(token=token)
-#                 #     return func(request, *args, **kwargs)
-#                 # except Token.DoesNotExist:
-#                 #     return json_response({
-#                 #         'error': 'Token not found'
-#                 #     }, status=401)
-#         return json_response({
-#             'error': 'Invalid Header'
-#         }, status=401)
-#
-#     return decorator
-
-
-# def token_required(func):
-#     def inner(request, *args, **kwargs):
-#         if request.method == 'OPTIONS':
-#             return func(request, *args, **kwargs)
-#         auth_header = request.META.get('HTTP_AUTHORIZATION', None)
-#         if auth_header is not None:
-#             tokens = auth_header.split(' ')
-#             if len(tokens) == 2 and tokens[0] == 'Token':
-#                 token = tokens[1]
-#                 try:
-#                     request.token = Token.objects.get(token=token)
-#                     return func(request, *args, **kwargs)
-#                 except Token.DoesNotExist:
-#                     return json_response({
-#                         'error': 'Token not found'
-#                     }, status=401)
-#         return json_response({
-#             'error': 'Invalid Header'
-#         }, status=401)
-#
-#     return inner
