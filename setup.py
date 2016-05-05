@@ -36,5 +36,6 @@ setup(
     install_requires = [
         'djangorestframework>=1.9.0',
         'djangorestframework-jwt>=1.7.2',
+        'django-filter',
     ],
 )
