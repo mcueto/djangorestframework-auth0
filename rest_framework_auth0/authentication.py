@@ -11,6 +11,9 @@ from rest_framework_jwt.settings import api_settings as jwt_api_settings
 from rest_framework_auth0.settings import api_settings
 
 from rest_framework_jwt.authentication import BaseJSONWebTokenAuthentication
+from django.contrib.auth.models import Group
+
+from rest_framework_auth0.utils import get_group_from_payload
 
 jwt_decode_handler = jwt_api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = jwt_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
@@ -79,6 +82,24 @@ class Auth0JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
             if created:
                 user.save()
 
+            user.groups.clear()
+
+            # """Get groups from app_metadata"""
+            groups = get_group_from_payload(payload)
+
+            # groups_ids = []
+
+            for user_group in groups:
+                group, created = Group.objects.get_or_create(name=user_group)
+
+                if created:
+                    group.save()
+
+                user.groups.add(group)
+                # groups_ids.append(group.id)
+
+            # user.groups = groups_ids
+
         except User.DoesNotExist:
             msg = _('Invalid signature.')
             raise exceptions.AuthenticationFailed(msg)
@@ -86,6 +107,9 @@ class Auth0JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
         if not user.is_active:
             msg = _('User account is disabled.')
             raise exceptions.AuthenticationFailed(msg)
+
+        # print(user.groups)
+        # print(dir(user.groups))
 
         return user
 
