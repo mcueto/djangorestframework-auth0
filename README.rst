@@ -5,7 +5,7 @@ djangorestframework-auth0
 Warning
 -------
 
-    **This library is in an early stage of development**, when i finish the first "stable" version, i will add it to pip and register the first release to github
+    **This library is in an early stage of development, use with caution, and -if you can- push some changes :)**
 
 
 Library to simply use Auth0 token authentication in DRF within djangorestframework-jwt
@@ -13,7 +13,7 @@ Library to simply use Auth0 token authentication in DRF within djangorestframewo
 This library let you to login an specific user based on the JWT Token returned by Auth0 Javascript libraries
 
 
-Detailed documentation is in the "docs" directory.
+Detailed documentation will be in the "docs" directory.
 
 Installation
 -----------
