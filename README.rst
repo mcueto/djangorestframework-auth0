@@ -20,7 +20,7 @@ Installation
 
 1. Using `pip` install the library cloning the repository with following command::
 
-    pip install -e git+https://github.com/mcueto/djangorestframework-auth0.git#egg=rest_framework_auth0
+    pip install rest_framework_auth0
 
 Quick start
 -----------
