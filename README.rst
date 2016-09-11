@@ -35,12 +35,12 @@ Quick start
 
 This will allow us to login as an specific user as well as auto-creating users when they don't exist
 
-1. Add "djangorestframework-auth0" to your INSTALLED_APPS **after** `rest_framework_jwt` setting like this::
+1. Add "rest_framework_auth0" to your INSTALLED_APPS **after** `rest_framework_jwt` setting like this::
 
     INSTALLED_APPS = [
         ...,
         'rest_framework_jwt',
-        'djangorestframework-auth0',
+        'rest_framework_auth0',
     ]
 
 2. Add `Auth0JSONWebTokenAuthentication` in your DEFAULT_AUTHENTICATION_CLASSES located at settings.py from your project::
