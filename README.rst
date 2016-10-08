@@ -56,7 +56,7 @@ This will allow us to login as an specific user as well as auto-creating users w
 3. Add your AUTH0_CLIENT_SECRET and AUTH0_CLIENT_ID in your settings.py file -must be the same secret and id than the frontend App-::
 
     AUTH0 = {
-        'AUTH0_CLIENT_ID':'<YOUR_AUTH0_CLIENT_ID>',
+        'AUTH0_CLIENT_ID':'<YOUR_AUTH0_CLIENT_ID>', #make sure it's the same string that aud attribute in your payload provides
         'AUTH0_CLIENT_SECRET':'<YOUR_AUTH0_CLIENT_SECRET>',
         'AUTH0_ALGORITHM':'HS256', #default used in Auth0 apps
         'JWT_AUTH_HEADER_PREFIX': 'JWT', #default prefix used by djangorestframework_jwt
@@ -69,3 +69,8 @@ This will allow us to login as an specific user as well as auto-creating users w
 5. Use the decorator `@token_required` in all views you want to protect (not_ready_yet)
 
 6. That's it
+
+Sample project
+-----------
+
+A sample project can be found on https://github.com/mcueto/djangorestframework-auth0_sample
