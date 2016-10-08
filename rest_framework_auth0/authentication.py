@@ -85,18 +85,18 @@ class Auth0JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
             user.groups.clear()
 
             # """Get groups from app_metadata"""
-            groups = get_group_from_payload(payload)
-
-            # groups_ids = []
-
-            for user_group in groups:
-                group, created = Group.objects.get_or_create(name=user_group)
-
-                if created:
-                    group.save()
-
-                user.groups.add(group)
-                # groups_ids.append(group.id)
+            # groups = get_group_from_payload(payload)
+            #
+            # # groups_ids = []
+            #
+            # for user_group in groups:
+            #     group, created = Group.objects.get_or_create(name=user_group)
+            #
+            #     if created:
+            #         group.save()
+            #
+            #     user.groups.add(group)
+            #     # groups_ids.append(group.id)
 
             # user.groups = groups_ids
 
