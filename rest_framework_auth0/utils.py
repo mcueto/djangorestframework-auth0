@@ -67,7 +67,7 @@ def get_role_from_payload(payload):
 
 
 def validate_role(roles, role):
-    if(role.upper in roles):
+    if(role.upper() in roles):
         return True
     else:
         return False
