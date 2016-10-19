@@ -13,7 +13,8 @@ DEFAULTS = {
     'AUTH0_CLIENT_ID':'',
     'AUTH0_CLIENT_SECRET':'',
     'AUTH0_ALGORITHM':'HS256',
-    'JWT_AUTH_HEADER_PREFIX':'JWT'
+    'JWT_AUTH_HEADER_PREFIX':'JWT',
+    'AUTHORIZATION_EXTENSION': False
 }
 
 # List of settings that may be in string import notation.

@@ -79,26 +79,27 @@ class Auth0JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
         try:
             user, created = User.objects.get_or_create(username=username)
 
-            if created:
-                user.save()
-
             user.groups.clear()
 
-            # """Get groups from app_metadata"""
-            # groups = get_group_from_payload(payload)
-            #
-            # # groups_ids = []
-            #
-            # for user_group in groups:
-            #     group, created = Group.objects.get_or_create(name=user_group)
-            #
-            #     if created:
-            #         group.save()
-            #
-            #     user.groups.add(group)
-            #     # groups_ids.append(group.id)
+            """
+            Validate if AUTHORIZATION_EXTENSION is enabled, default to False
 
-            # user.groups = groups_ids
+            If AUTHORIZATION_EXTENSION is enabled, created and asociate groups
+            with the current user(the user of the token)
+            """
+            if(api_settings.AUTHORIZATION_EXTENSION):
+
+                groups = get_group_from_payload(payload)
+
+                groups_ids = []
+
+                for user_group in groups:
+                    group, created = Group.objects.get_or_create(name=user_group)
+
+                    if(group):
+                        user.groups.add(group)
+                        groups_ids.append(group.id)
+                        user.groups = groups_ids
 
         except User.DoesNotExist:
             msg = _('Invalid signature.')
@@ -107,9 +108,6 @@ class Auth0JSONWebTokenAuthentication(BaseJSONWebTokenAuthentication):
         if not user.is_active:
             msg = _('User account is disabled.')
             raise exceptions.AuthenticationFailed(msg)
-
-        # print(user.groups)
-        # print(dir(user.groups))
 
         return user
 
