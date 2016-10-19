@@ -56,15 +56,14 @@ def get_user_metadata_from_payload(payload):
 
     return user_metadata
 
-
-#ROLES
+"""
+Role validation utils
+"""
 
 def get_role_from_payload(payload):
-
     roles = get_app_metadata_from_payload(payload)["roles"]
 
     return roles
-
 
 def validate_role(roles, role):
     if(role.upper() in roles):
@@ -76,10 +75,13 @@ def validate_role_from_payload(payload, role):
     roles = get_role_from_payload(payload)
     return validate_role(roles, role)
 
-#GROUPS
+
+"""
+Group validation utils
+"""
 
 def get_group_from_payload(payload):
-    group = get_app_metadata_from_payload(payload)["groups"]
+    group = get_app_metadata_from_payload(payload)["authorization"]["groups"]
 
     return group
 
