@@ -1,4 +1,8 @@
 class GroupsQuerysetFilterMixin():
+    """
+    Filter a queryset based on the groups asociated to the model instance
+    we're requesting
+    """
 
     def get_queryset(self):
         print("FILTERING BY GROUP :)")
