@@ -8,6 +8,7 @@ rest_framework_auth0/apps.py
 rest_framework_auth0/authentication.py
 rest_framework_auth0/decorators.py
 rest_framework_auth0/models.py
+rest_framework_auth0/permissions.py
 rest_framework_auth0/serializers.py
 rest_framework_auth0/settings.py
 rest_framework_auth0/tests.py
