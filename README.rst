@@ -60,7 +60,8 @@ This will allow us to login as an specific user as well as auto-creating users w
         'AUTH0_CLIENT_SECRET':'<YOUR_AUTH0_CLIENT_SECRET>',
         'AUTH0_ALGORITHM':'HS256', #default used in Auth0 apps
         'JWT_AUTH_HEADER_PREFIX': 'JWT', #default prefix used by djangorestframework_jwt
-        'AUTHORIZATION_EXTENSION': False #if True, enable groups auto_creations based on the app_metadata.groups attribute on the user payload
+        'AUTHORIZATION_EXTENSION': False, #if True, enable groups auto_creations based on the app_metadata.groups attribute on the user payload
+        'CLIENT_SECRET_BASE64_ENCODED': True #default to True, if you're Auth0 user since December, maybe you should set it to False
     }
 
 4. Add the `Authorization` Header to all of your REST API request, prefixing JWT to your token::

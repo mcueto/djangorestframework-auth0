@@ -2,12 +2,12 @@ from distutils.core import setup
 setup(
   name = 'rest_framework_auth0',
   packages = ['rest_framework_auth0'],
-  version = '0.1.8',
+  version = '0.1.9',
   description = 'Django Rest Framework Library to use Auth0 authentication',
   author = 'Marcelo Cueto',
   author_email = 'yo@marcelocueto.cl',
   url = 'https://github.com/mcueto/djangorestframework-auth0',
-  download_url = 'https://github.com/mcueto/djangorestframework-auth0/tarball/0.1.8',
+  download_url = 'https://github.com/mcueto/djangorestframework-auth0/tarball/0.1.9',
   keywords = ['auth0', 'rest framework', 'django'],
   classifiers=[
       'Environment :: Web Environment',
