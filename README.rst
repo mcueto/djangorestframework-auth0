@@ -62,7 +62,7 @@ This will allow us to login as an specific user as well as auto-creating users w
         'JWT_AUTH_HEADER_PREFIX': 'JWT',  # default prefix used by djangorestframework_jwt
         'AUTHORIZATION_EXTENSION': False,  # if True, enable groups auto_creations based on the app_metadata.groups attribute on the user payload
         'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-        'AUTH0_USERNAME_FIELD': 'sub',  # default username field in auth0 token scope to use as token user
+        'USERNAME_FIELD': 'sub',  # default username field in auth0 token scope to use as token user
     }
 
 4. Add the `Authorization` Header to all of your REST API request, prefixing JWT to your token::
