@@ -18,7 +18,8 @@ from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from functools import wraps
 from rest_framework import exceptions
-from rest_framework_auth0.utils import get_jwt_value, get_roles_from_payload, jwt_decode_handler
+from rest_framework_auth0.authentication import jwt_decode_handler
+from rest_framework_auth0.utils import get_jwt_value, get_roles_from_payload
 
 class token_required(object):
 

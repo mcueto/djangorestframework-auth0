@@ -1,6 +1,10 @@
 from __future__ import unicode_literals
+
 from rest_framework.permissions import BasePermission
-from rest_framework_auth0.utils import get_jwt_value, get_roles_from_payload, validate_role_from_payload, jwt_decode_handler
+
+from rest_framework_auth0.authentication import jwt_decode_handler
+from rest_framework_auth0.utils import get_jwt_value, validate_role_from_payload
+
 
 class HasRoleBasePermission(BasePermission):
     """
@@ -46,6 +50,7 @@ class HasRoleBasePermission(BasePermission):
 
         except Exception as e:
             return False
+
 
 class HasAdminRole(HasRoleBasePermission):
     role_name = 'admin'
