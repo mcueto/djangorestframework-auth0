@@ -1,7 +1,7 @@
 import json
 from django.http import HttpResponse
 from rest_framework.response import Response
-from rest_framework_auth0.settings import api_settings
+from rest_framework_auth0.settings import auth0_api_settings
 
 def json_response(response_dict, status=200):
     response = HttpResponse(json.dumps(response_dict), content_type="application/json", status=status)
@@ -18,7 +18,7 @@ from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from functools import wraps
 from rest_framework import exceptions
-from rest_framework_auth0.utils import get_jwt_value, get_role_from_payload, jwt_decode_handler
+from rest_framework_auth0.utils import get_jwt_value, get_roles_from_payload, jwt_decode_handler
 
 class token_required(object):
 
@@ -39,7 +39,7 @@ class token_required(object):
         if auth_header is not None:
             tokens = auth_header.split(' ')
 
-            if len(tokens) == 2 and tokens[0] == api_settings.JWT_AUTH_HEADER_PREFIX :
+            if len(tokens) == 2 and tokens[0] == auth0_api_settings.JWT_AUTH_HEADER_PREFIX :
                 token = tokens[1]
                 #get called view
                 response = self.view_func(request, *args, **kwargs)
@@ -92,7 +92,7 @@ class with_role(object):
         try:
             payload = jwt_decode_handler(jwt)
 
-            roles = get_role_from_payload(payload)
+            roles = get_roles_from_payload(payload)
 
             if(len(roles)>0):
                 # get called view
