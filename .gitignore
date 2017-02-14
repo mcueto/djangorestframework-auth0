@@ -3,3 +3,5 @@
 dist/*
 migrations/*
 .idea/
+.DS_Store
+*/.DS_Store
