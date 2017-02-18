@@ -5,3 +5,5 @@ migrations/*
 .idea/
 .DS_Store
 */.DS_Store
+.cache
+*/__pycache__
