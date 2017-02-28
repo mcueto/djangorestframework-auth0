@@ -37,7 +37,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         """
         user, jwt_value = self.authenticate(request)
         if jwt_value is None:
-            return False
+            return None
         # jwt_decode_handler errors are managed on parent's authenticate method
         payload = jwt_decode_handler(jwt_value)
         return payload
