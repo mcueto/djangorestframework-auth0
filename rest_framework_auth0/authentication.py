@@ -30,6 +30,19 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
     # Create a User object if not already in the database?
     create_unknown_user = True
 
+
+    def get_payload(self, request):
+        """
+        Returns the request's payload
+        """
+        user, jwt_value = self.authenticate(request)
+        if jwt_value is None:
+            return None
+        # jwt_decode_handler errors are managed on parent's authenticate method
+        payload = jwt_decode_handler(jwt_value)
+        return payload
+
+
     def authenticate_credentials(self, payload):
         """
         Returns an active user that matches the payload's user id and email.

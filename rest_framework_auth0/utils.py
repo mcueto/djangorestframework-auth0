@@ -1,5 +1,4 @@
 from rest_framework_auth0.settings import auth0_api_settings
-from rest_framework_auth0.authentication import JSONWebTokenAuthentication
 
 
 # Handlers --------------------------------------------------------------------
@@ -7,13 +6,6 @@ from rest_framework_auth0.authentication import JSONWebTokenAuthentication
 def auth0_get_username_from_payload_handler(payload):
     username = payload.get(auth0_api_settings.USERNAME_FIELD)
     return username
-
-
-# Authorization Utils ---------------------------------------------------------
-
-def get_jwt_value(request):
-    jwt_value = JSONWebTokenAuthentication().get_jwt_value(request)
-    return jwt_value
 
 
 # Auth0 Metadata --------------------------------------------------------------
