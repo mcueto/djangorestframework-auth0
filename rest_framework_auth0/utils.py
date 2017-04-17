@@ -2,13 +2,14 @@
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
-from rest_framework_auth0.settings import auth0_api_settings
 from rest_framework.authentication import get_authorization_header
+
+from rest_framework_auth0.settings import auth0_api_settings
 
 
 # Handlers --------------------------------------------------------------------
 def auth0_get_username_from_payload_handler(payload):
-    username = payload.get(auth0_api_settings.USERNAME_FIELD)
+    username = auth0_api_settings.USERNAME_FIELD
     return username
 
 
