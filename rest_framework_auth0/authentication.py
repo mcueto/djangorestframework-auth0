@@ -1,17 +1,16 @@
-from django.contrib.auth.models import Group
-from django.contrib.auth.backends import RemoteUserBackend, get_user_model
-from django.utils.translation import ugettext as _
+import base64
 
+from django.contrib.auth.backends import RemoteUserBackend, get_user_model
+from django.contrib.auth.models import Group
+from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from rest_framework_auth0.settings import auth0_api_settings, jwt_api_settings
+from rest_framework_auth0.settings import jwt_api_settings, auth0_api_settings
 from rest_framework_auth0.utils import get_groups_from_payload
-
 
 jwt_decode_handler = jwt_api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = jwt_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
-
 
 class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBackend):
     """
@@ -29,6 +28,31 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
 
     # Create a User object if not already in the database?
     create_unknown_user = True
+
+    def authenticate(self, request):
+        """
+        You should pass a header of your request: clientcode: web
+        This function initialize the settings of JWT with the specific client's informations.
+        """
+        client_code = request.META.get("HTTP_CLIENTCODE", b'')
+        try:
+            client = auth0_api_settings.CLIENTS[client_code]
+        except:
+            msg = _('Invalid Client Code.')
+            raise exceptions.AuthenticationFailed(msg)
+
+        # Replace rest_framework_jwt api settings
+        if client['CLIENT_SECRET_BASE64_ENCODED']:
+            jwt_api_settings.JWT_SECRET_KEY = base64.b64decode(
+                client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
+            )
+        else:
+            jwt_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
+
+        jwt_api_settings.JWT_ALGORITHM = auth0_api_settings.AUTH0_ALGORITHM
+        jwt_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
+        jwt_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
+        return super(Auth0JSONWebTokenAuthentication, self).authenticate(request)
 
     def authenticate_credentials(self, payload):
         """
