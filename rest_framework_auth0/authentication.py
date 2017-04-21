@@ -34,10 +34,14 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         You should pass a header of your request: clientcode: web
         This function initialize the settings of JWT with the specific client's informations.
         """
-        client_code = request.META.get("HTTP_CLIENTCODE", b'')
-        try:
+
+        client_code = request.META.get("HTTP_" + auth0_api_settings.CLIENT_CODE.upper())
+        if client_code is None:
+            return None
+
+        if client_code in auth0_api_settings.CLIENTS:
             client = auth0_api_settings.CLIENTS[client_code]
-        except:
+        else:
             msg = _('Invalid Client Code.')
             raise exceptions.AuthenticationFailed(msg)
 

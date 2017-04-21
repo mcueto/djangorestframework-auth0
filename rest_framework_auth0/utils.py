@@ -9,7 +9,7 @@ from rest_framework_auth0.settings import auth0_api_settings
 
 # Handlers --------------------------------------------------------------------
 def auth0_get_username_from_payload_handler(payload):
-    username = auth0_api_settings.USERNAME_FIELD
+    username = payload.get(auth0_api_settings.USERNAME_FIELD)
     return username
 
 
