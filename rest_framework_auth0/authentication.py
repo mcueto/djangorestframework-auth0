@@ -37,7 +37,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
 
         client_code = request.META.get("HTTP_" + auth0_api_settings.CLIENT_CODE.upper())
         if client_code is None:
-            return None
+            client_code = auth0_api_settings.CLIENT
 
         if client_code in auth0_api_settings.CLIENTS:
             client = auth0_api_settings.CLIENTS[client_code]
