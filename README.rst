@@ -4,9 +4,40 @@ djangorestframework-auth0
 
 Warning
 -------
+```
+**This library is in an early stage of development, use with caution, and -if you can- push some changes :)**
+```
 
-    **This library is in an early stage of development, use with caution, and -if you can- push some changes :)**
+Migrate from 0.2.1 to >0.4.0
+---
+**If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
 
+From this
+```
+AUTH0 = {
+    'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>', # make sure it's the same string that aud attribute in your payload provides
+    'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+    'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+    ...
+}
+
+```
+
+To this
+```
+AUTH0 = {
+  'CLIENTS': {
+      'default': {
+          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
+          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+      }
+  },
+  ...
+}
+```
+
+___
 
 Library to simply use Auth0 token authentication in DRF within djangorestframework-jwt
 
@@ -106,7 +137,8 @@ AUTH0 = {
 }
 ```
 
-In order to select one of them when the authentication is needed -a POST request, for example- you need to add a request header called -by default, but you can customize it- **CLIENT_CODE**
+In order to select one of them when the authentication is needed -a POST request, for example- you need to add a header called **Client-Code** -by default, but you can customize it-.
+The names of the clients are **case sensitive**.
 
 Sample project
 -----------
