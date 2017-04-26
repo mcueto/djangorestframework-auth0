@@ -10,7 +10,6 @@ DEFAULTS = {
     'AUTHORIZATION_EXTENSION': False,
     'USERNAME_FIELD': 'sub',
     'CLIENT_CODE': 'Client_Code',
-    'CLIENT': 'Web',
     'CLIENTS': {},
     # Handlers
     'JWT_PAYLOAD_GET_USERNAME_HANDLER':

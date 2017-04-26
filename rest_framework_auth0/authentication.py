@@ -35,9 +35,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         This function initialize the settings of JWT with the specific client's informations.
         """
 
-        client_code = request.META.get("HTTP_" + auth0_api_settings.CLIENT_CODE.upper())
-        if client_code is None:
-            client_code = auth0_api_settings.CLIENT
+        client_code = request.META.get("HTTP_" + auth0_api_settings.CLIENT_CODE.upper()) or 'default'
 
         if client_code in auth0_api_settings.CLIENTS:
             client = auth0_api_settings.CLIENTS[client_code]
