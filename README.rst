@@ -1,43 +1,43 @@
-=====
+=========================
 djangorestframework-auth0
-=====
+=========================
 
 Warning
 -------
-```
-**This library is in an early stage of development, use with caution, and -if you can- push some changes :)**
-```
+
+  **This library is in an early stage of development, use with caution, and -if you can- push some changes :)**
+
 
 Migrate from 0.2.1 to >0.4.0
----
-**If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
+----------------------------
+
+  **If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
 
 From this
-```
-AUTH0 = {
-    'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>', # make sure it's the same string that aud attribute in your payload provides
-    'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-    'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-    ...
-}
 
-```
+  AUTH0 = {
+      'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>', # make sure it's the same string that aud attribute in your payload provides
+      'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+      'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+      ...
+  }
+
 
 To this
-```
-AUTH0 = {
-  'CLIENTS': {
-      'default': {
-          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
-          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-      }
-  },
-  ...
-}
-```
+
+  AUTH0 = {
+    'CLIENTS': {
+        'default': {
+            'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
+            'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+            'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+        }
+    },
+    ...
+  }
 
 ___
+
 
 Library to simply use Auth0 token authentication in DRF within djangorestframework-jwt
 
@@ -46,12 +46,14 @@ This library let you to login an specific user based on the JWT Token returned b
 
 Detailed documentation will be in the "docs" directory.
 
+
 Installation
------------
+------------
 
 1. Using `pip` install the library cloning the repository with following command::
 
     pip install rest_framework_auth0
+
 
 Quick start
 -----------
@@ -86,7 +88,6 @@ This will allow us to login as an specific user as well as auto-creating users w
 
 3. Add your AUTH0_CLIENT_SECRET and AUTH0_CLIENT_ID in your settings.py file -must be the same secret and id than the frontend App-::
 
-    ```
     AUTH0 = {
       'CLIENTS': {
           'default': {
@@ -100,7 +101,6 @@ This will allow us to login as an specific user as well as auto-creating users w
       'AUTHORIZATION_EXTENSION': False,  # default to False
       'USERNAME_FIELD': 'sub',  # default username field in auth0 token scope to use as token user
     }
-    ```
 
 4. Add the `Authorization` Header to all of your REST API request, prefixing JWT to your token::
 
@@ -110,37 +110,37 @@ This will allow us to login as an specific user as well as auto-creating users w
 
 6. That's it
 
+
 Multiple Clients - Multiples App - One API
------------
+------------------------------------------
+
 If you wanna to use multiple Auth0 App and/or Clients -for example if you're creating an open API, you can add as much as you want in the **AUTH0.CLIENTS** settings parameter
 
-```
-AUTH0 = {
-  'CLIENTS': {
-      'default': {
-          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
-          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-      }
-      'web': {
-          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
-          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-      }
-      'mobile': {
-          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
-          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-      }
-  },
-  ...
-}
-```
+  AUTH0 = {
+    'CLIENTS': {
+        'default': {
+            'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
+            'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+            'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+        }
+        'web': {
+            'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
+            'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+            'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+        }
+        'mobile': {
+            'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
+            'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
+            'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+        }
+    },
+    ...
+  }
 
 In order to select one of them when the authentication is needed -a POST request, for example- you need to add a header called **Client-Code** -by default, but you can customize it-.
 The names of the clients are **case sensitive**.
 
 Sample project
------------
+--------------
 
 A sample project can be found on https://github.com/mcueto/djangorestframework-auth0_sample
