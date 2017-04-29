@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='rest_framework_auth0',
     packages=['rest_framework_auth0'],
-    version='0.2.1',
+    version='0.4.0',
     description='Django Rest Framework Library to use Auth0 authentication',
     author='Marcelo Cueto',
     author_email='yo@marcelocueto.cl',
