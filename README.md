@@ -2,12 +2,6 @@
 djangorestframework-auth0
 =====
 
-Warning
--------
-```
-**This library is in an early stage of development, use with caution, and -if you can- push some changes :)**
-```
-
 Migrate from 0.2.1 to >0.4.0
 ---
 **If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
