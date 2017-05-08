@@ -2,7 +2,7 @@
 djangorestframework-auth0
 =====
 
-Migrate from 0.2.1 to >0.4.0
+Migrate from 0.2.1 to >0.4.5
 ---
 **If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
 
@@ -24,12 +24,17 @@ AUTH0 = {
       'default': {
           'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
           'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False,
+          'AUTH0_ALGORITHM': 'HS256',  # HS256 or RS256
+          'PUBLIC_KEY': <YOUR_AUTH0_CERTIFICATE>,  # used only for RS256
       }
   },
   ...
 }
 ```
+
+***If you wanna use RS256, please follow the [sample project][sample]***
+
 
 ___
 
@@ -139,4 +144,6 @@ The names of the clients are **case sensitive**.
 Sample project
 -----------
 
-A sample project can be found on https://github.com/mcueto/djangorestframework-auth0_sample
+A sample project can be found [here][sample]
+
+[sample]: https://github.com/mcueto/djangorestframework-auth0_sample
