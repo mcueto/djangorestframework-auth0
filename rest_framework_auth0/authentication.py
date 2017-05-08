@@ -51,7 +51,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         else:
             jwt_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
 
-        jwt_api_settings.JWT_ALGORITHM = auth0_api_settings.AUTH0_ALGORITHM
+        jwt_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
         jwt_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
         jwt_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
         return super(Auth0JSONWebTokenAuthentication, self).authenticate(request)
