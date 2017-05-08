@@ -43,17 +43,22 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
             msg = _('Invalid Client Code.')
             raise exceptions.AuthenticationFailed(msg)
 
-        # Replace rest_framework_jwt api settings
-        if client['CLIENT_SECRET_BASE64_ENCODED']:
-            jwt_api_settings.JWT_SECRET_KEY = base64.b64decode(
-                client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
-            )
-        else:
-            jwt_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
-
         jwt_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
         jwt_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
         jwt_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
+
+        # RS256 Related configurations
+        if(client['AUTH0_ALGORITHM'].upper() == "HS256"):
+            if client['CLIENT_SECRET_BASE64_ENCODED']:
+                jwt_api_settings.JWT_SECRET_KEY = base64.b64decode(
+                    client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
+                )
+            else:
+                jwt_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
+
+        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+            jwt_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
+
         return super(Auth0JSONWebTokenAuthentication, self).authenticate(request)
 
     def authenticate_credentials(self, payload):
