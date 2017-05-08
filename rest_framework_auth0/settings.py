@@ -5,7 +5,6 @@ from rest_framework_jwt.settings import api_settings as jwt_api_settings
 USER_SETTINGS = getattr(settings, 'AUTH0', None)
 
 DEFAULTS = {
-    'AUTH0_ALGORITHM': 'HS256',
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     'AUTHORIZATION_EXTENSION': False,
     'USERNAME_FIELD': 'sub',
