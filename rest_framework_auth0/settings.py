@@ -10,6 +10,7 @@ DEFAULTS = {
     'USERNAME_FIELD': 'sub',
     'CLIENT_CODE': 'Client_Code',
     'CLIENTS': {},
+    'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': True,
     # Handlers
     'JWT_PAYLOAD_GET_USERNAME_HANDLER':
     'rest_framework_auth0.utils.auth0_get_username_from_payload_handler',
