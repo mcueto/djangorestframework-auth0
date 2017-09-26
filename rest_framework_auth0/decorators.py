@@ -45,6 +45,8 @@ class token_required(object):
                 response = self.view_func(request, *args, **kwargs)
             else:
                 response = json_response({"msg":"Not valid token"}, status=401)
+        else:
+            response = json_response({"msg": "Missing token"}, status=401)
 
         # maybe do something after the view_func call
         # print ("----bye")
