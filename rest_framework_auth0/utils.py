@@ -47,12 +47,12 @@ def get_user_metadata_from_payload(payload):
 # Role validation utils -------------------------------------------------------
 
 def get_roles_from_payload(payload):
-    roles = get_app_metadata_from_payload(payload)['roles']
+    roles = get_app_metadata_from_payload(payload)['authorization']['roles']
     return roles
 
 
 def validate_role(roles, role):
-    return role.upper() in roles
+    return role in roles
 
 
 def validate_role_from_payload(payload, role):
