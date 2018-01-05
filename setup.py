@@ -1,4 +1,4 @@
-from setuptools.setup import setup
+from setuptools import setup
 
 setup(
     name='rest_framework_auth0',
