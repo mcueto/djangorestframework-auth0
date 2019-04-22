@@ -1,49 +1,9 @@
-=====
 djangorestframework-auth0
 =====
-
-Migrate from 0.2.1 to >0.4.5
----
-**If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
-
-From this
-``` python
-AUTH0 = {
-    'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>', # make sure it's the same string that aud attribute in your payload provides
-    'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-    'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-    ...
-}
-
-```
-
-To this
-``` python
-AUTH0 = {
-  'CLIENTS': {
-      'default': {
-          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
-          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False,
-          'AUTH0_ALGORITHM': 'HS256',  # HS256 or RS256
-          'PUBLIC_KEY': <YOUR_AUTH0_CERTIFICATE>,  # used only for RS256
-      }
-  },
-  ...
-}
-```
-
-***If you wanna use RS256, please follow the [sample project][sample]***
-
-
 ___
 
-Library to simply use Auth0 token authentication in DRF within djangorestframework-jwt
+This library let you to **authenticate** an specific user on DRF based on the JWT Token returned by Auth0 Javascript libraries.
 
-This library let you to login an specific user based on the JWT Token returned by Auth0 Javascript libraries
-
-
-Detailed documentation will be in the "docs" directory.
 
 Installation
 -----------
@@ -56,7 +16,7 @@ pip install rest_framework_auth0
 Quick start
 -----------
 
-1. Add "django.contrib.auth to INSTALLED_APPS settings like this:
+1. Make sure "django.contrib.auth in on INSTALLED_APPS setting, otherwise add it by your own:
 ``` python
 INSTALLED_APPS = [
     ...
@@ -141,9 +101,17 @@ AUTH0 = {
 In order to select one of them when the authentication is needed -a POST request, for example- you need to add a header called **Client-Code** -by default, but you can customize it-.
 The names of the clients are **case sensitive**.
 
-Sample project
------------
 
+Migrations
+---
+- [Migrate from 0.2.1 to > 0.4.5](docs/migrations.md)
+
+RS256 Support
+---
+If you wanna use RS256, please follow the Sample Project
+
+Sample Project
+-----------
 A sample project can be found [here][sample]
 
 [sample]: https://github.com/mcueto/djangorestframework-auth0_sample
