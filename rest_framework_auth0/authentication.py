@@ -73,7 +73,11 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
             # RemoteUserBackend behavior:
             # return
         user = None
-        username = self.clean_username(remote_user)
+
+        if auth0_api_settings.REPLACE_PIPE_FOR_DOTS_IN_USERNAME:
+            username = self.clean_username(remote_user)
+        else:
+            username = remote_user
 
         if self.create_unknown_user:
             user, created = UserModel._default_manager.get_or_create(**{
