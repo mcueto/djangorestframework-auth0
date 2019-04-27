@@ -71,6 +71,10 @@ Authorization: JWT <AUTH0_GIVEN_TOKEN>
 
 6. That's it
 
+```
+NOTE: In order to get the token authentication, the 'django.contrib.auth' app models migrations must be applied(python manage.py migrate).
+```
+
 Multiple Clients - Multiples App - One API
 -----------
 If you wanna to use multiple Auth0 App and/or Clients -for example if you're creating an open API, you can add as much as you want in the **AUTH0.CLIENTS** settings parameter
