@@ -1,4 +1,5 @@
 import base64
+import jwt
 
 from django.contrib.auth.backends import RemoteUserBackend, get_user_model
 from django.contrib.auth.models import Group
@@ -58,9 +59,28 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
             jwt_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
 
-        return super(Auth0JSONWebTokenAuthentication, self).authenticate(request)
+        # Code copied from rest_framework_jwt/authentication.py#L28
+        jwt_value = self.get_jwt_value(request)
+        if jwt_value is None:
+            return None
 
-    def authenticate_credentials(self, payload):
+        try:
+            payload = jwt_decode_handler(jwt_value)
+        except jwt.ExpiredSignature:
+            msg = _('Signature has expired.')
+            raise exceptions.AuthenticationFailed(msg)
+        except jwt.DecodeError:
+            msg = _('Error decoding signature.')
+            raise exceptions.AuthenticationFailed(msg)
+        except jwt.InvalidTokenError:
+            raise exceptions.AuthenticationFailed()
+
+        # Add request param to authenticated_credentials() call
+        user = self.authenticate_credentials(request, payload)
+
+        return (user, payload)
+
+    def authenticate_credentials(self, request, payload):
         """
         Returns an active user that matches the payload's user id and email.
         """
@@ -72,6 +92,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
             raise exceptions.AuthenticationFailed(msg)
             # RemoteUserBackend behavior:
             # return
+
         user = None
 
         if auth0_api_settings.REPLACE_PIPE_FOR_DOTS_IN_USERNAME:
@@ -83,8 +104,10 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
             user, created = UserModel._default_manager.get_or_create(**{
                 UserModel.USERNAME_FIELD: username
             })
+
             if created:
-                user = self.configure_user(user)
+                user = self.configure_user(request, user)
+
         else:
             try:
                 user = UserModel._default_manager.get_by_natural_key(username)
