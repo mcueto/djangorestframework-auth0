@@ -86,16 +86,19 @@ AUTH0 = {
           'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
           'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
           'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+          'AUTH0_ALGORITHM': 'HS256',
       }
       'web': {
           'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
           'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
           'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+          'AUTH0_ALGORITHM': 'HS256',
       }
       'mobile': {
           'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
           'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
           'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
+          'AUTH0_ALGORITHM': 'HS256',
       }
   },
   ...
