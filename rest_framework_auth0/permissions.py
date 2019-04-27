@@ -54,3 +54,9 @@ class HasRoleBasePermission(BasePermission):
 
 class HasAdminRole(HasRoleBasePermission):
     role_name = 'admin'
+
+
+class HasRole(HasRoleBasePermission):
+
+    def __init__(self, role_name):
+        self.role_name = role_name
