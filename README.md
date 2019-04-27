@@ -4,6 +4,7 @@ ___
 
 This library let you to **authenticate** an specific user on DRF based on the JWT Token returned by Auth0 Javascript libraries.
 
+![Logo](docs/logo.png)
 
 Installation
 -----------
