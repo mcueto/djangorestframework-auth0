@@ -14,6 +14,7 @@ DEFAULTS = {
     # Handlers
     'JWT_PAYLOAD_GET_USERNAME_HANDLER':
     'rest_framework_auth0.utils.auth0_get_username_from_payload_handler',
+    'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': False
 }
 
 # List of settings that may be in string import notation.
