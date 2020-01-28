@@ -7,7 +7,6 @@ from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 
 from rest_framework_auth0.settings import (
-    jwt_api_settings,
     auth0_api_settings,
 )
 from rest_framework_auth0.utils import get_groups_from_payload
@@ -16,7 +15,6 @@ from django.utils.encoding import smart_text
 from rest_framework.authentication import (
     BaseAuthentication, get_authorization_header
 )
-from rest_framework_jwt.settings import api_settings
 
 jwt_decode_handler = auth0_api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
@@ -53,21 +51,21 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
             msg = _('Invalid Client Code.')
             raise exceptions.AuthenticationFailed(msg)
 
-        jwt_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
-        jwt_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
-        jwt_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
+        auth0_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
+        auth0_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
+        auth0_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
 
         # RS256 Related configurations
         if(client['AUTH0_ALGORITHM'].upper() == "HS256"):
             if client['CLIENT_SECRET_BASE64_ENCODED']:
-                jwt_api_settings.JWT_SECRET_KEY = base64.b64decode(
+                auth0_api_settings.JWT_SECRET_KEY = base64.b64decode(
                     client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
                 )
             else:
-                jwt_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
+                auth0_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
 
         if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
-            jwt_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
+            auth0_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
 
         # Code copied from rest_framework_jwt/authentication.py#L28
         jwt_value = self.get_jwt_value(request)
@@ -135,7 +133,10 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         header in a `401 Unauthenticated` response, or `None` if the
         authentication scheme should return `403 Permission Denied` responses.
         """
-        return '{0} realm="{1}"'.format(api_settings.JWT_AUTH_HEADER_PREFIX, self.www_authenticate_realm)
+        return '{0} realm="{1}"'.format(
+            auth0_api_settings.JWT_AUTH_HEADER_PREFIX,
+            self.www_authenticate_realm
+        )
 
     def configure_user_permissions(self, user, payload):
         """
@@ -169,11 +170,11 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
     def get_jwt_value(self, request):
         auth = get_authorization_header(request).split()
-        auth_header_prefix = api_settings.JWT_AUTH_HEADER_PREFIX.lower()
+        auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX.lower()
 
         if not auth:
-            if api_settings.JWT_AUTH_COOKIE:
-                return request.COOKIES.get(api_settings.JWT_AUTH_COOKIE)
+            if auth0_api_settings.JWT_AUTH_COOKIE:
+                return request.COOKIES.get(auth0_api_settings.JWT_AUTH_COOKIE)
             return None
 
         if smart_text(auth[0].lower()) != auth_header_prefix:
