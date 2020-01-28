@@ -5,15 +5,24 @@ from django.contrib.auth.backends import RemoteUserBackend, get_user_model
 from django.contrib.auth.models import Group
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from rest_framework_auth0.settings import jwt_api_settings, auth0_api_settings
+from rest_framework_auth0.settings import (
+    jwt_api_settings,
+    auth0_api_settings,
+)
 from rest_framework_auth0.utils import get_groups_from_payload
 
-jwt_decode_handler = jwt_api_settings.JWT_DECODE_HANDLER
-jwt_get_username_from_payload = jwt_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+from django.utils.encoding import smart_text
+from rest_framework.authentication import (
+    BaseAuthentication, get_authorization_header
+)
+from rest_framework_jwt.settings import api_settings
 
-class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBackend):
+jwt_decode_handler = auth0_api_settings.JWT_DECODE_HANDLER
+jwt_get_username_from_payload = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+
+
+class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
     """
     Clients should authenticate by passing the token key in the "Authorization"
     HTTP header, prepended with the string specified in the setting
@@ -27,6 +36,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
     ``False``.
     """
 
+    www_authenticate_realm = 'api'
     # Create a User object if not already in the database?
     create_unknown_user = True
 
@@ -119,6 +129,14 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         user = self.configure_user_permissions(user, payload)
         return user if self.user_can_authenticate(user) else None
 
+    def authenticate_header(self, request):
+        """
+        Return a string to be used as the value of the `WWW-Authenticate`
+        header in a `401 Unauthenticated` response, or `None` if the
+        authentication scheme should return `403 Permission Denied` responses.
+        """
+        return '{0} realm="{1}"'.format(api_settings.JWT_AUTH_HEADER_PREFIX, self.www_authenticate_realm)
+
     def configure_user_permissions(self, user, payload):
         """
         Validate if AUTHORIZATION_EXTENSION is enabled, defaults to False
@@ -148,3 +166,25 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         """
         username = username.replace('|', '.')
         return username
+
+    def get_jwt_value(self, request):
+        auth = get_authorization_header(request).split()
+        auth_header_prefix = api_settings.JWT_AUTH_HEADER_PREFIX.lower()
+
+        if not auth:
+            if api_settings.JWT_AUTH_COOKIE:
+                return request.COOKIES.get(api_settings.JWT_AUTH_COOKIE)
+            return None
+
+        if smart_text(auth[0].lower()) != auth_header_prefix:
+            return None
+
+        if len(auth) == 1:
+            msg = _('Invalid Authorization header. No credentials provided.')
+            raise exceptions.AuthenticationFailed(msg)
+        elif len(auth) > 2:
+            msg = _('Invalid Authorization header. Credentials string '
+                    'should not contain spaces.')
+            raise exceptions.AuthenticationFailed(msg)
+
+        return auth[1]

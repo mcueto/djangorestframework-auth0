@@ -14,7 +14,9 @@ DEFAULTS = {
     # Handlers
     'JWT_PAYLOAD_GET_USERNAME_HANDLER':
     'rest_framework_auth0.utils.auth0_get_username_from_payload_handler',
-    'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': False
+    'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': False,
+    'JWT_DECODE_HANDLER':
+    'rest_framework_jwt.utils.jwt_decode_handler',
 }
 
 # List of settings that may be in string import notation.
@@ -22,5 +24,8 @@ IMPORT_STRINGS = (
     'JWT_PAYLOAD_GET_USERNAME_HANDLER',
 )
 
-auth0_api_settings = APISettings(USER_SETTINGS, DEFAULTS, IMPORT_STRINGS)
-jwt_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+auth0_api_settings = APISettings(
+    USER_SETTINGS,
+    DEFAULTS,
+    IMPORT_STRINGS
+)
