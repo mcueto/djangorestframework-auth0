@@ -25,7 +25,9 @@ class GroupsQuerysetFilterMixin():
         original_queryset = self.queryset
         try:
             queryset = original_queryset.filter(
-                groups__in=self.request.user.groups.all())
+                groups__in=self.request.user.groups.all()
+            )
+
         except Exception as e:
             queryset = []
 
