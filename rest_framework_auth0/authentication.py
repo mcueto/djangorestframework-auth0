@@ -1,19 +1,24 @@
 import base64
 import jwt
 
-from django.contrib.auth.backends import RemoteUserBackend, get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.backends import (
+    RemoteUserBackend,
+    get_user_model,
+)
+from django.contrib.auth.models import (
+    Group,
+)
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
-
 from rest_framework_auth0.settings import (
     auth0_api_settings,
 )
-from rest_framework_auth0.utils import get_groups_from_payload
-
-from django.utils.encoding import smart_text
+from rest_framework_auth0.utils import (
+    get_groups_from_payload,
+)
 from rest_framework.authentication import (
-    BaseAuthentication, get_authorization_header
+    BaseAuthentication,
+    get_authorization_header
 )
 
 jwt_decode_handler = auth0_api_settings.JWT_DECODE_HANDLER
@@ -55,19 +60,19 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         auth0_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
         auth0_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
-        auth0_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
+        # auth0_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
 
         # RS256 Related configurations
-        if(client['AUTH0_ALGORITHM'].upper() == "HS256"):
+        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+            auth0_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
+
+        elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
             if client['CLIENT_SECRET_BASE64_ENCODED']:
                 auth0_api_settings.JWT_SECRET_KEY = base64.b64decode(
                     client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
                 )
             else:
                 auth0_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
-
-        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
-            auth0_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
 
         # Code copied from rest_framework_jwt/authentication.py#L28
         jwt_value = self.get_jwt_value(request)
@@ -76,12 +81,15 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         try:
             payload = jwt_decode_handler(jwt_value)
+
         except jwt.ExpiredSignature:
             msg = _('Signature has expired.')
             raise exceptions.AuthenticationFailed(msg)
+
         except jwt.DecodeError:
             msg = _('Error decoding signature.')
             raise exceptions.AuthenticationFailed(msg)
+
         except jwt.InvalidTokenError:
             raise exceptions.AuthenticationFailed()
 
@@ -121,6 +129,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         else:
             try:
                 user = UserModel._default_manager.get_by_natural_key(username)
+
             except UserModel.DoesNotExist:
                 msg = _('Invalid signature.')
                 raise exceptions.AuthenticationFailed(msg)
@@ -174,17 +183,20 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         auth = get_authorization_header(request).split()
         auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX.lower()
 
+        # If authorization header doesn't exists, use a cookie
         if not auth:
             if auth0_api_settings.JWT_AUTH_COOKIE:
                 return request.COOKIES.get(auth0_api_settings.JWT_AUTH_COOKIE)
             return None
 
-        if smart_text(auth[0].lower()) != auth_header_prefix:
+        # If header prefix is diferent than expected, the user won't log in
+        if auth[0].lower() != auth_header_prefix:
             return None
 
         if len(auth) == 1:
             msg = _('Invalid Authorization header. No credentials provided.')
             raise exceptions.AuthenticationFailed(msg)
+
         elif len(auth) > 2:
             msg = _('Invalid Authorization header. Credentials string '
                     'should not contain spaces.')

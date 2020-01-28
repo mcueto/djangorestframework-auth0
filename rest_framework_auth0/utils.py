@@ -90,6 +90,7 @@ def jwt_decode_handler(token):
     # get user from token, BEFORE verification, to get user secret key
     unverified_payload = jwt.decode(token, None, False)
     secret_key = jwt_get_secret_key(unverified_payload)
+
     return jwt.decode(
         token,
         auth0_api_settings.JWT_PUBLIC_KEY or secret_key,
