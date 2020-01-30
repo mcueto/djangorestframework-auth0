@@ -21,7 +21,6 @@ from rest_framework.authentication import (
     get_authorization_header
 )
 
-jwt_decode_handler = auth0_api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
 
@@ -58,29 +57,42 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
             msg = _('Invalid Client Code.')
             raise exceptions.AuthenticationFailed(msg)
 
-        auth0_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
-        auth0_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
-        # auth0_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
-
-        # RS256 Related configurations
-        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
-            auth0_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
-
-        elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
-            if client['CLIENT_SECRET_BASE64_ENCODED']:
-                auth0_api_settings.JWT_SECRET_KEY = base64.b64decode(
-                    client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
-                )
-            else:
-                auth0_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
-
         # Code copied from rest_framework_jwt/authentication.py#L28
         jwt_value = self.get_jwt_value(request)
         if jwt_value is None:
             return None
 
         try:
-            payload = jwt_decode_handler(jwt_value)
+            # RS256 Related configurations
+            if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+                payload = jwt.decode(
+                    jwt_value,
+                    client['PUBLIC_KEY'],
+                    audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
+                    algorithm=client['AUTH0_ALGORITHM'],
+                )
+
+            elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
+                client_secret = None
+
+                if client['CLIENT_SECRET_BASE64_ENCODED']:
+                    client_secret = base64.b64decode(
+                        client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
+                    )
+
+                else:
+                    client_secret = client['AUTH0_CLIENT_SECRET']
+
+                    payload = jwt.decode(
+                        jwt_value,
+                        client_secret,
+                        audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
+                        algorithm=client['AUTH0_ALGORITHM'],
+                    )
+
+            else:
+                # TODO: raise exception when algorithm is not RS256 or HS256
+                pass
 
         except jwt.ExpiredSignature:
             msg = _('Signature has expired.')
