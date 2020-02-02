@@ -59,16 +59,16 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
             raise exceptions.AuthenticationFailed(msg)
 
         # Code copied from rest_framework_jwt/authentication.py#L28
-        jwt_value = self.get_auth_token(request)
+        auth_token = self.get_auth_token(request)
 
-        if jwt_value is None:
+        if auth_token is None:
             return None
 
         try:
             # RS256 Related configurations
             if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
                 payload = jwt.decode(
-                    jwt_value,
+                    auth_token,
                     client['PUBLIC_KEY'],
                     audience=client['AUTH0_AUDIENCE'],
                     algorithm=client['AUTH0_ALGORITHM'],
@@ -86,7 +86,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
                     client_secret = client['AUTH0_CLIENT_SECRET']
 
                     payload = jwt.decode(
-                        jwt_value,
+                        auth_token,
                         client_secret,
                         audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
                         algorithm=client['AUTH0_ALGORITHM'],
