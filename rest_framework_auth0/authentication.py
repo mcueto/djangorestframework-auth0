@@ -59,7 +59,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
             raise exceptions.AuthenticationFailed(msg)
 
         # Code copied from rest_framework_jwt/authentication.py#L28
-        jwt_value = self.get_jwt_value(request)
+        jwt_value = self.get_auth_token(request)
 
         if jwt_value is None:
             return None
@@ -193,7 +193,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         username = username.replace('|', '.')
         return username
 
-    def get_jwt_value(self, request):
+    def get_auth_token(self, request):
         auth = get_authorization_header(request).split()
         auth_header_prefix = force_str(auth[0])
         auth_token = force_str(auth[1])

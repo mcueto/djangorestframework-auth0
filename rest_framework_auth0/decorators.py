@@ -8,7 +8,7 @@ from rest_framework_auth0.authentication import (
     jwt_decode_handler,
 )
 from rest_framework_auth0.utils import (
-    get_jwt_value,
+    get_auth_token,
     get_roles_from_payload,
 )
 
@@ -111,7 +111,7 @@ class with_role(object):
         if request.method == 'OPTIONS':
             return func(request, *args, **kwargs)
 
-        jwt = get_jwt_value(request)
+        jwt = get_auth_token(request)
 
         try:
             payload = jwt_decode_handler(jwt)

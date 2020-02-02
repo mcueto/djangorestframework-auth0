@@ -14,7 +14,7 @@ def auth0_get_username_from_payload_handler(payload):
 
 
 # Authorization Utils ---------------------------------------------------------
-def get_jwt_value(request):
+def get_auth_token(request):
     auth = get_authorization_header(request).split()
     auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX.lower()
 
