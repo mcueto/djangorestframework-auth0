@@ -8,6 +8,7 @@ from django.contrib.auth.backends import (
 from django.contrib.auth.models import (
     Group,
 )
+from django.utils.encoding import force_str
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework_auth0.settings import (
@@ -59,6 +60,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         # Code copied from rest_framework_jwt/authentication.py#L28
         jwt_value = self.get_jwt_value(request)
+
         if jwt_value is None:
             return None
 
@@ -193,7 +195,9 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
     def get_jwt_value(self, request):
         auth = get_authorization_header(request).split()
-        auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX.lower()
+        auth_header_prefix = force_str(auth[0])
+        auth_token = force_str(auth[1])
+        expected_auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
 
         # If authorization header doesn't exists, use a cookie
         if not auth:
@@ -202,7 +206,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
             return None
 
         # If header prefix is diferent than expected, the user won't log in
-        if auth[0].lower() != auth_header_prefix:
+        if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
             return None
 
         if len(auth) == 1:
@@ -214,4 +218,4 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
                     'should not contain spaces.')
             raise exceptions.AuthenticationFailed(msg)
 
-        return auth[1]
+        return auth_token
