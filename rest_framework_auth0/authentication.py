@@ -93,8 +93,8 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
                     )
 
             else:
-                # TODO: raise exception when algorithm is not RS256 or HS256
-                pass
+                msg = _('Error decoding signature.')
+                raise exceptions.AuthenticationFailed(msg)
 
         except jwt.ExpiredSignature:
             msg = _('Signature has expired.')
