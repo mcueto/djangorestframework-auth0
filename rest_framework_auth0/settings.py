@@ -13,9 +13,7 @@ DEFAULTS = {
     # Handlers
     'JWT_PAYLOAD_GET_USERNAME_HANDLER':
     'rest_framework_auth0.utils.auth0_get_username_from_payload_handler',
-    'JWT_DECODE_HANDLER':
     # Copied from rest_framework_jwt settings, temporal while migrating to pyjwt
-    'rest_framework_auth0.utils.jwt_decode_handler',
     'JWT_SECRET_KEY': settings.SECRET_KEY,
     'JWT_GET_USER_SECRET_KEY': None,
     'JWT_VERIFY_EXPIRATION': True,
