@@ -1,6 +1,5 @@
 from django.conf import settings
 from rest_framework.settings import APISettings
-from rest_framework_jwt.settings import api_settings as jwt_api_settings
 
 USER_SETTINGS = getattr(settings, 'AUTH0', None)
 
@@ -14,7 +13,17 @@ DEFAULTS = {
     # Handlers
     'JWT_PAYLOAD_GET_USERNAME_HANDLER':
     'rest_framework_auth0.utils.auth0_get_username_from_payload_handler',
-    'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': False
+    # Copied from rest_framework_jwt settings, temporal while migrating to pyjwt
+    'JWT_SECRET_KEY': settings.SECRET_KEY,
+    'JWT_GET_USER_SECRET_KEY': None,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_PUBLIC_KEY': None,
+    'JWT_VERIFY': True,
+    'JWT_LEEWAY': 0,
+    'JWT_AUDIENCE': None,
+    'JWT_ISSUER': None,
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_AUTH_COOKIE': None,
 }
 
 # List of settings that may be in string import notation.
@@ -22,5 +31,8 @@ IMPORT_STRINGS = (
     'JWT_PAYLOAD_GET_USERNAME_HANDLER',
 )
 
-auth0_api_settings = APISettings(USER_SETTINGS, DEFAULTS, IMPORT_STRINGS)
-jwt_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+auth0_api_settings = APISettings(
+    USER_SETTINGS,
+    DEFAULTS,
+    IMPORT_STRINGS
+)

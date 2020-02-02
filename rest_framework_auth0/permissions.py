@@ -2,9 +2,8 @@ from __future__ import unicode_literals
 
 from rest_framework.permissions import BasePermission
 
-from rest_framework_auth0.authentication import jwt_decode_handler
 from rest_framework_auth0.utils import (
-    get_jwt_value,
+    get_auth_token,
     validate_role_from_payload,
 )
 
@@ -46,10 +45,11 @@ class HasRoleBasePermission(BasePermission):
         if request.method == 'OPTIONS':
             return True
 
-        jwt = get_jwt_value(request)
+        jwt = get_auth_token(request)
 
         try:
-            payload = jwt_decode_handler(jwt)
+            # TODO: get payload from request
+            payload = {}
 
             return validate_role_from_payload(payload, self.get_role_name())
 

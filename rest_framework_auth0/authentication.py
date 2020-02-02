@@ -1,19 +1,31 @@
 import base64
 import jwt
 
-from django.contrib.auth.backends import RemoteUserBackend, get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.backends import (
+    RemoteUserBackend,
+    get_user_model,
+)
+from django.contrib.auth.models import (
+    Group,
+)
+from django.utils.encoding import force_str
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_auth0.settings import (
+    auth0_api_settings,
+)
+from rest_framework_auth0.utils import (
+    get_groups_from_payload,
+)
+from rest_framework.authentication import (
+    BaseAuthentication,
+    get_authorization_header
+)
 
-from rest_framework_auth0.settings import jwt_api_settings, auth0_api_settings
-from rest_framework_auth0.utils import get_groups_from_payload
+jwt_get_username_from_payload = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
-jwt_decode_handler = jwt_api_settings.JWT_DECODE_HANDLER
-jwt_get_username_from_payload = jwt_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
-class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBackend):
+class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
     """
     Clients should authenticate by passing the token key in the "Authorization"
     HTTP header, prepended with the string specified in the setting
@@ -27,6 +39,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
     ``False``.
     """
 
+    www_authenticate_realm = 'api'
     # Create a User object if not already in the database?
     create_unknown_user = True
 
@@ -35,7 +48,9 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         You should pass a header of your request: clientcode: web
         This function initialize the settings of JWT with the specific client's informations.
         """
-        client_code = request.META.get("HTTP_" + auth0_api_settings.CLIENT_CODE.upper()) or 'default'
+        client_code = request.META.get(
+            "HTTP_" + auth0_api_settings.CLIENT_CODE.upper()
+        ) or 'default'
 
         if client_code in auth0_api_settings.CLIENTS:
             client = auth0_api_settings.CLIENTS[client_code]
@@ -43,35 +58,52 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
             msg = _('Invalid Client Code.')
             raise exceptions.AuthenticationFailed(msg)
 
-        jwt_api_settings.JWT_ALGORITHM = client['AUTH0_ALGORITHM']
-        jwt_api_settings.JWT_AUDIENCE = client['AUTH0_CLIENT_ID']
-        jwt_api_settings.JWT_AUTH_HEADER_PREFIX = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
-
-        # RS256 Related configurations
-        if(client['AUTH0_ALGORITHM'].upper() == "HS256"):
-            if client['CLIENT_SECRET_BASE64_ENCODED']:
-                jwt_api_settings.JWT_SECRET_KEY = base64.b64decode(
-                    client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
-                )
-            else:
-                jwt_api_settings.JWT_SECRET_KEY = client['AUTH0_CLIENT_SECRET']
-
-        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
-            jwt_api_settings.JWT_PUBLIC_KEY = client['PUBLIC_KEY']
-
         # Code copied from rest_framework_jwt/authentication.py#L28
-        jwt_value = self.get_jwt_value(request)
-        if jwt_value is None:
+        auth_token = self.get_auth_token(request)
+
+        if auth_token is None:
             return None
 
         try:
-            payload = jwt_decode_handler(jwt_value)
+            # RS256 Related configurations
+            if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+                payload = jwt.decode(
+                    auth_token,
+                    client['PUBLIC_KEY'],
+                    audience=client['AUTH0_AUDIENCE'],
+                    algorithm=client['AUTH0_ALGORITHM'],
+                )
+
+            elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
+                client_secret = None
+
+                if client['CLIENT_SECRET_BASE64_ENCODED']:
+                    client_secret = base64.b64decode(
+                        client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
+                    )
+
+                else:
+                    client_secret = client['AUTH0_CLIENT_SECRET']
+
+                    payload = jwt.decode(
+                        auth_token,
+                        client_secret,
+                        audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
+                        algorithm=client['AUTH0_ALGORITHM'],
+                    )
+
+            else:
+                msg = _('Error decoding signature.')
+                raise exceptions.AuthenticationFailed(msg)
+
         except jwt.ExpiredSignature:
             msg = _('Signature has expired.')
             raise exceptions.AuthenticationFailed(msg)
+
         except jwt.DecodeError:
             msg = _('Error decoding signature.')
             raise exceptions.AuthenticationFailed(msg)
+
         except jwt.InvalidTokenError:
             raise exceptions.AuthenticationFailed()
 
@@ -111,6 +143,7 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         else:
             try:
                 user = UserModel._default_manager.get_by_natural_key(username)
+
             except UserModel.DoesNotExist:
                 msg = _('Invalid signature.')
                 raise exceptions.AuthenticationFailed(msg)
@@ -118,6 +151,17 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
                 # pass
         user = self.configure_user_permissions(user, payload)
         return user if self.user_can_authenticate(user) else None
+
+    def authenticate_header(self, request):
+        """
+        Return a string to be used as the value of the `WWW-Authenticate`
+        header in a `401 Unauthenticated` response, or `None` if the
+        authentication scheme should return `403 Permission Denied` responses.
+        """
+        return '{0} realm="{1}"'.format(
+            auth0_api_settings.JWT_AUTH_HEADER_PREFIX,
+            self.www_authenticate_realm
+        )
 
     def configure_user_permissions(self, user, payload):
         """
@@ -148,3 +192,30 @@ class Auth0JSONWebTokenAuthentication(JSONWebTokenAuthentication, RemoteUserBack
         """
         username = username.replace('|', '.')
         return username
+
+    def get_auth_token(self, request):
+        auth = get_authorization_header(request).split()
+        auth_header_prefix = force_str(auth[0])
+        auth_token = force_str(auth[1])
+        expected_auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
+
+        # If authorization header doesn't exists, use a cookie
+        if not auth:
+            if auth0_api_settings.JWT_AUTH_COOKIE:
+                return request.COOKIES.get(auth0_api_settings.JWT_AUTH_COOKIE)
+            return None
+
+        # If header prefix is diferent than expected, the user won't log in
+        if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
+            return None
+
+        if len(auth) == 1:
+            msg = _('Invalid Authorization header. No credentials provided.')
+            raise exceptions.AuthenticationFailed(msg)
+
+        elif len(auth) > 2:
+            msg = _('Invalid Authorization header. Credentials string '
+                    'should not contain spaces.')
+            raise exceptions.AuthenticationFailed(msg)
+
+        return auth_token
