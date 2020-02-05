@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import logging
 
 from rest_framework.permissions import BasePermission
 
@@ -6,6 +7,8 @@ from rest_framework_auth0.utils import (
     get_auth_token,
     validate_role_from_payload,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class HasRoleBasePermission(BasePermission):
