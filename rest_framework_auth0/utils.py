@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 # Handlers --------------------------------------------------------------------
-def auth0_get_username_from_payload_handler(payload):
+def get_username_from_payload(payload):
     username = payload.get(auth0_api_settings.USERNAME_FIELD)
 
     return username

@@ -23,7 +23,7 @@ from rest_framework.authentication import (
     get_authorization_header
 )
 
-jwt_get_username_from_payload = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+get_username_from_payload = auth0_api_settings.GET_USERNAME_HANDLER
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +196,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         Returns an active user that matches the payload's user id and email.
         """
         UserModel = get_user_model()
-        remote_user = jwt_get_username_from_payload(payload)
+        remote_user = get_username_from_payload(payload)
 
         if not remote_user:
             msg = _('Invalid payload.')

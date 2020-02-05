@@ -12,13 +12,13 @@ DEFAULTS = {
     'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': True,
     'COOKIE_NAME': None,
     # Handlers
-    'JWT_PAYLOAD_GET_USERNAME_HANDLER':
-    'rest_framework_auth0.utils.auth0_get_username_from_payload_handler',
+    'GET_USERNAME_HANDLER':
+    'rest_framework_auth0.utils.get_username_from_payload',
 }
 
 # List of settings that may be in string import notation.
 IMPORT_STRINGS = (
-    'JWT_PAYLOAD_GET_USERNAME_HANDLER',
+    'GET_USERNAME_HANDLER',
 )
 
 auth0_api_settings = APISettings(
