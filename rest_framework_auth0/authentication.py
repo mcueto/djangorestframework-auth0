@@ -344,11 +344,11 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         # If authorization header doesn't exists, use a cookie
         if not auth:
-            if auth0_api_settings.JWT_AUTH_COOKIE:
+            if auth0_api_settings.COOKIE_NAME:
                 logger.warning(
                     "Using Cookie instead of header"
                 )
-                return request.COOKIES.get(auth0_api_settings.JWT_AUTH_COOKIE)
+                return request.COOKIES.get(auth0_api_settings.COOKIE_NAME)
             return None
 
         # If header prefix is diferent than expected, the user won't log in
