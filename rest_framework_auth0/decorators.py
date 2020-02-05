@@ -1,4 +1,6 @@
 import json
+import logging
+
 from functools import wraps
 from django.http import HttpResponse
 from rest_framework_auth0.settings import (
@@ -11,6 +13,8 @@ from rest_framework_auth0.utils import (
     get_auth_token,
     get_roles_from_payload,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def json_response(response_dict, status=200):
