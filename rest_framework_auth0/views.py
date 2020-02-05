@@ -1,4 +1,7 @@
 """DjangoRestFramework Auth0 Views."""
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GroupsQuerysetFilterMixin():
@@ -23,12 +26,31 @@ class GroupsQuerysetFilterMixin():
         specific group.
         """
         original_queryset = self.queryset
+
         try:
+            logger.debug(
+                "Filtering queryset: {queryset}".format(
+                    queryset=original_queryset
+                )
+            )
+
             queryset = original_queryset.filter(
                 groups__in=self.request.user.groups.all()
             )
 
+            logger.debug(
+                "Filtered queryset: {queryset}".format(
+                    queryset=queryset
+                )
+            )
+
         except Exception as e:
             queryset = []
+
+            logger.error(
+                "An exception was thrown when filtering queryset: {exception}".format(
+                    exception=e
+                )
+            )
 
         return queryset
