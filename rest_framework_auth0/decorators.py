@@ -6,9 +6,6 @@ from django.http import HttpResponse
 from rest_framework_auth0.settings import (
     auth0_api_settings,
 )
-from rest_framework_auth0.authentication import (
-    jwt_decode_handler,
-)
 from rest_framework_auth0.utils import (
     get_auth_token,
     get_roles_from_payload,
@@ -32,7 +29,6 @@ def json_response(response_dict, status=200):
 TODO: Verify if the token is valid and not expired(need to decode before verify)
 TODO: Test if the decorators work
 """
-
 
 class token_required(object):
 
@@ -118,7 +114,8 @@ class with_role(object):
         jwt = get_auth_token(request)
 
         try:
-            payload = jwt_decode_handler(jwt)
+            # TODO: get payload from token
+            payload = {}
 
             roles = get_roles_from_payload(payload)
 

@@ -166,28 +166,10 @@ def jwt_get_secret_key(payload=None):
         User = get_user_model()  # noqa: N806
         user = User.objects.get(pk=payload.get('user_id'))
         key = str(auth0_api_settings.JWT_GET_USER_SECRET_KEY(user))
+
         return key
+
     return auth0_api_settings.JWT_SECRET_KEY
-
-
-def jwt_decode_handler(token):
-    options = {
-        'verify_exp': auth0_api_settings.JWT_VERIFY_EXPIRATION,
-    }
-    # get user from token, BEFORE verification, to get user secret key
-    unverified_payload = jwt.decode(token, None, False)
-    secret_key = jwt_get_secret_key(unverified_payload)
-
-    return jwt.decode(
-        token,
-        auth0_api_settings.JWT_PUBLIC_KEY or secret_key,
-        auth0_api_settings.JWT_VERIFY,
-        options=options,
-        leeway=auth0_api_settings.JWT_LEEWAY,
-        audience=auth0_api_settings.JWT_AUDIENCE,
-        issuer=auth0_api_settings.JWT_ISSUER,
-        algorithms=[auth0_api_settings.JWT_ALGORITHM]
-    )
 
 
 def validate_group(group, expected_group):
