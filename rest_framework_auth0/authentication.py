@@ -139,7 +139,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
                 payload = jwt.decode(
                     auth_token,
                     client_secret,
-                    audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
+                    audience=client['AUTH0_AUDIENCE'],
                     algorithm=client['AUTH0_ALGORITHM'],
                 )
 
