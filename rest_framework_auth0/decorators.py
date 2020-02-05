@@ -50,7 +50,7 @@ class token_required(object):
             tokens = auth_header.split(' ')
 
             if len(tokens) == 2 and \
-                    tokens[0] == auth0_api_settings.JWT_AUTH_HEADER_PREFIX:
+                    tokens[0] == auth0_api_settings.AUTH_HEADER_PREFIX:
                 token = tokens[1]
                 # get called view
                 response = self.view_func(request, *args, **kwargs)

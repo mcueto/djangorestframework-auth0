@@ -20,7 +20,7 @@ def get_username_from_payload(payload):
 # Authorization Utils ---------------------------------------------------------
 def get_auth_token(request):
     auth = get_authorization_header(request).split()
-    auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX.lower()
+    auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX.lower()
 
     if not auth or smart_text(auth[0].lower()) != auth_header_prefix:
         return None

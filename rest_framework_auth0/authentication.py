@@ -32,7 +32,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
     """
     Clients should authenticate by passing the token key in the "Authorization"
     HTTP header, prepended with the string specified in the setting
-    `JWT_AUTH_HEADER_PREFIX`. For example:
+    `AUTH_HEADER_PREFIX`. For example:
 
         Authorization: JWT eyJhbGciOiAiSFMyNTYiLCAidHlwIj
 
@@ -252,7 +252,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         authentication scheme should return `403 Permission Denied` responses.
         """
         return '{0} realm="{1}"'.format(
-            auth0_api_settings.JWT_AUTH_HEADER_PREFIX,
+            auth0_api_settings.AUTH_HEADER_PREFIX,
             self.www_authenticate_realm
         )
 
@@ -340,7 +340,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         auth = get_authorization_header(request).split()
         auth_header_prefix = force_str(auth[0])
         auth_token = force_str(auth[1])
-        expected_auth_header_prefix = auth0_api_settings.JWT_AUTH_HEADER_PREFIX
+        expected_auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX
 
         # If authorization header doesn't exists, use a cookie
         if not auth:

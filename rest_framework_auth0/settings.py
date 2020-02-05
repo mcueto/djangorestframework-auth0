@@ -4,7 +4,7 @@ from rest_framework.settings import APISettings
 USER_SETTINGS = getattr(settings, 'AUTH0', None)
 
 DEFAULTS = {
-    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'AUTH_HEADER_PREFIX': 'JWT',
     'AUTHORIZATION_EXTENSION': False,
     'USERNAME_FIELD': 'sub',
     'CLIENT_CODE': 'Client_Code',
