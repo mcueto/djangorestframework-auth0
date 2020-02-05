@@ -154,24 +154,6 @@ def get_groups_from_payload(payload):
     return groups
 
 
-def jwt_get_secret_key(payload=None):
-    """
-    For enhanced security you may want to use a secret key based on user.
-    This way you have an option to logout only this user if:
-        - token is compromised
-        - password is changed
-        - etc.
-    """
-    if auth0_api_settings.JWT_GET_USER_SECRET_KEY:
-        User = get_user_model()  # noqa: N806
-        user = User.objects.get(pk=payload.get('user_id'))
-        key = str(auth0_api_settings.JWT_GET_USER_SECRET_KEY(user))
-
-        return key
-
-    return auth0_api_settings.JWT_SECRET_KEY
-
-
 def validate_group(group, expected_group):
     return group == expected_group
 
