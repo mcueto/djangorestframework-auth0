@@ -1,5 +1,6 @@
 import base64
 import jwt
+import logging
 
 from django.contrib.auth.backends import (
     RemoteUserBackend,
@@ -23,6 +24,8 @@ from rest_framework.authentication import (
 )
 
 jwt_get_username_from_payload = auth0_api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+
+logger = logging.getLogger(__name__)
 
 
 class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
@@ -48,14 +51,40 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         You should pass a header of your request: clientcode: web
         This function initialize the settings of JWT with the specific client's informations.
         """
+        client = None
+        payload = None
+
+        logger.debug("authenticating user using Auth0JSONWebTokenAuthentication")
+
         client_code = request.META.get(
             "HTTP_" + auth0_api_settings.CLIENT_CODE.upper()
         ) or 'default'
 
+        logger.debug(
+            "client_code = {client_code}".format(
+                client_code=client_code
+            )
+        )
+
         if client_code in auth0_api_settings.CLIENTS:
             client = auth0_api_settings.CLIENTS[client_code]
+
+            logger.debug(
+                "client = {client}".format(
+                    client=client
+                )
+            )
+
         else:
             msg = _('Invalid Client Code.')
+
+            logger.warning(
+                "{msg}: {client_code}".format(
+                    msg=msg,
+                    client_code=client_code
+                )
+            )
+
             raise exceptions.AuthenticationFailed(msg)
 
         # Code copied from rest_framework_jwt/authentication.py#L28
@@ -67,6 +96,10 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         try:
             # RS256 Related configurations
             if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+                logger.debug(
+                    "Using RS256 algorithm"
+                )
+
                 payload = jwt.decode(
                     auth_token,
                     client['PUBLIC_KEY'],
@@ -77,34 +110,80 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
             elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
                 client_secret = None
 
+                logger.debug(
+                    "Using HS256 algorithm"
+                )
+
                 if client['CLIENT_SECRET_BASE64_ENCODED']:
+                    logger.debug(
+                        "Client secret is base64 encoded"
+                    )
+
                     client_secret = base64.b64decode(
                         client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
                     )
 
                 else:
+                    logger.debug(
+                        "Client secret is not base64 encoded"
+                    )
+
                     client_secret = client['AUTH0_CLIENT_SECRET']
 
-                    payload = jwt.decode(
-                        auth_token,
-                        client_secret,
-                        audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
-                        algorithm=client['AUTH0_ALGORITHM'],
+                logger.debug(
+                    "client_secret = {client_secret}".format(
+                        client_secret=client_secret
                     )
+                )
+
+                payload = jwt.decode(
+                    auth_token,
+                    client_secret,
+                    audience=auth0_api_settings.get('AUTH0_AUDIENCE'),
+                    algorithm=client['AUTH0_ALGORITHM'],
+                )
 
             else:
                 msg = _('Error decoding signature.')
                 raise exceptions.AuthenticationFailed(msg)
 
+            logger.debug(
+                "payload = {payload}".format(
+                    payload=payload
+                )
+            )
+
         except jwt.ExpiredSignature:
             msg = _('Signature has expired.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
             raise exceptions.AuthenticationFailed(msg)
 
         except jwt.DecodeError:
             msg = _('Error decoding signature.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
             raise exceptions.AuthenticationFailed(msg)
 
         except jwt.InvalidTokenError:
+            msg = _('Invalid token.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
             raise exceptions.AuthenticationFailed()
 
         # Add request param to authenticated_credentials() call
@@ -121,6 +200,13 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         if not remote_user:
             msg = _('Invalid payload.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
             raise exceptions.AuthenticationFailed(msg)
             # RemoteUserBackend behavior:
             # return
@@ -129,8 +215,15 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         if auth0_api_settings.REPLACE_PIPE_FOR_DOTS_IN_USERNAME:
             username = self.clean_username(remote_user)
+
         else:
             username = remote_user
+
+        logger.debug(
+            "username = {username}".format(
+                username=username
+            )
+        )
 
         if self.create_unknown_user:
             user, created = UserModel._default_manager.get_or_create(**{
@@ -171,13 +264,50 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         with the current user (the user of the token).
         """
         if auth0_api_settings.AUTHORIZATION_EXTENSION:
+            logger.debug(
+                "Using Auth0 Authorization Extension"
+            )
+
+            logger.debug(
+                "Clearing groups for user: {username}".format(
+                    username=user.username
+                )
+            )
+
             user.groups.clear()
+
             try:
+                logger.debug(
+                    "Getting groups from payload"
+                )
+
                 groups = get_groups_from_payload(payload)
+
+                logger.debug(
+                    "Groups: {groups}".format(
+                        groups=groups
+                    )
+                )
+
             except Exception:  # No groups where defined in Auth0?
+                logger.warning(
+                    "No groups were defined for user: {username}".format(
+                        username=user.username
+                    )
+                )
+
                 return user
+
             for user_group in groups:
                 group, created = Group.objects.get_or_create(name=user_group)
+
+                logger.debug(
+                    "Associating group {group} with user {username}".format(
+                        group=group,
+                        username=user.username
+                    )
+                )
+
                 user.groups.add(group)
 
         return user
@@ -190,10 +320,23 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         Auth0 default username (user_id) field returns, e.g. auth0|123456789...xyz
         which contains illegal characters ('|').
         """
+        logger.debug("Cleaning username")
+
         username = username.replace('|', '.')
+
+        logger.debug(
+            "Clean username: {username}".format(
+                username=username
+            )
+        )
+
         return username
 
     def get_auth_token(self, request):
+        logger.debug(
+            "Getting auth token"
+        )
+
         auth = get_authorization_header(request).split()
         auth_header_prefix = force_str(auth[0])
         auth_token = force_str(auth[1])
@@ -202,20 +345,44 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         # If authorization header doesn't exists, use a cookie
         if not auth:
             if auth0_api_settings.JWT_AUTH_COOKIE:
+                logger.warning(
+                    "Using Cookie instead of header"
+                )
                 return request.COOKIES.get(auth0_api_settings.JWT_AUTH_COOKIE)
             return None
 
         # If header prefix is diferent than expected, the user won't log in
         if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
+            logger.warning(
+                "Invalid header prefix, expected {expected} found {found}".format(
+                    expected=expected_auth_header_prefix.lower(),
+                    found=auth_header_prefix.lower()
+                )
+            )
+
             return None
 
         if len(auth) == 1:
             msg = _('Invalid Authorization header. No credentials provided.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
             raise exceptions.AuthenticationFailed(msg)
 
         elif len(auth) > 2:
             msg = _('Invalid Authorization header. Credentials string '
                     'should not contain spaces.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
             raise exceptions.AuthenticationFailed(msg)
 
         return auth_token
