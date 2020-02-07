@@ -1,13 +1,23 @@
 """DjangoRestFramework Auth0 Utils."""
-import jwt
 import logging
-from django.utils.encoding import smart_text
+from django.utils.encoding import force_str
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework.authentication import get_authorization_header
 from rest_framework_auth0.settings import auth0_api_settings
 
 logger = logging.getLogger(__name__)
+
+
+def validate_authorization_header(auth_header):
+    try:
+        auth_header_prefix = force_str(auth_header[0])
+        auth_token = force_str(auth_header[1])
+
+    except Exception as e:
+        logger.debug(e)
+
+        return None
 
 
 # Handlers --------------------------------------------------------------------
