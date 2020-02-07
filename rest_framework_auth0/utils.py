@@ -28,14 +28,46 @@ def get_username_from_payload(payload):
 
 
 # Authorization Utils ---------------------------------------------------------
-def get_auth_token(request):
-    auth = get_authorization_header(request).split()
-    auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX.lower()
+def get_auth_token(self, request):
+    logger.debug(
+        "Getting auth token"
+    )
 
-    if not auth or smart_text(auth[0].lower()) != auth_header_prefix:
+    auth_header = get_authorization_header(request).split()
+
+    if not validate_authorization_header(auth_header):
+        logger.debug(
+            "Invalid authorization header"
+        )
+
         return None
 
-    if len(auth) == 1:
+    auth_header_prefix = force_str(auth_header[0])
+    auth_token = force_str(auth_header[1])
+
+    expected_auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX
+
+    # If authorization header doesn't exists, use a cookie
+    if not auth_header:
+        if auth0_api_settings.AUTH_COOKIE_NAME:
+            logger.warning(
+                "Using Cookie instead of header"
+            )
+            return request.COOKIES.get(auth0_api_settings.AUTH_COOKIE_NAME)
+        return None
+
+    # If header prefix is diferent than expected, the user won't log in
+    if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
+        logger.warning(
+            "Invalid header prefix, expected {expected} found {found}".format(
+                expected=expected_auth_header_prefix.lower(),
+                found=auth_header_prefix.lower()
+            )
+        )
+
+        return None
+
+    if len(auth_header) == 1:
         msg = _('Invalid Authorization header. No credentials provided.')
 
         logger.info(
@@ -46,7 +78,7 @@ def get_auth_token(request):
 
         raise exceptions.AuthenticationFailed(msg)
 
-    elif len(auth) > 2:
+    elif len(auth_header) > 2:
         msg = _('Invalid Authorization header. Credentials string '
                 'should not contain spaces.')
 
@@ -58,7 +90,7 @@ def get_auth_token(request):
 
         raise exceptions.AuthenticationFailed(msg)
 
-    return auth[1]
+    return auth_token
 
 
 # Auth0 Metadata --------------------------------------------------------------

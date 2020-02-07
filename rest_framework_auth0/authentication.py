@@ -9,7 +9,6 @@ from django.contrib.auth.backends import (
 from django.contrib.auth.models import (
     Group,
 )
-from django.utils.encoding import force_str
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework_auth0.settings import (
@@ -20,7 +19,6 @@ from rest_framework_auth0.utils import (
 )
 from rest_framework.authentication import (
     BaseAuthentication,
-    get_authorization_header
 )
 
 get_username_from_payload = auth0_api_settings.GET_USERNAME_HANDLER
@@ -331,58 +329,3 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         )
 
         return username
-
-    def get_auth_token(self, request):
-        logger.debug(
-            "Getting auth token"
-        )
-
-        auth = get_authorization_header(request).split()
-        auth_header_prefix = force_str(auth[0])
-        auth_token = force_str(auth[1])
-        expected_auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX
-
-        # If authorization header doesn't exists, use a cookie
-        if not auth:
-            if auth0_api_settings.AUTH_COOKIE_NAME:
-                logger.warning(
-                    "Using Cookie instead of header"
-                )
-                return request.COOKIES.get(auth0_api_settings.AUTH_COOKIE_NAME)
-            return None
-
-        # If header prefix is diferent than expected, the user won't log in
-        if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
-            logger.warning(
-                "Invalid header prefix, expected {expected} found {found}".format(
-                    expected=expected_auth_header_prefix.lower(),
-                    found=auth_header_prefix.lower()
-                )
-            )
-
-            return None
-
-        if len(auth) == 1:
-            msg = _('Invalid Authorization header. No credentials provided.')
-
-            logger.info(
-                "{message}".format(
-                    message=msg
-                )
-            )
-
-            raise exceptions.AuthenticationFailed(msg)
-
-        elif len(auth) > 2:
-            msg = _('Invalid Authorization header. Credentials string '
-                    'should not contain spaces.')
-
-            logger.info(
-                "{message}".format(
-                    message=msg
-                )
-            )
-
-            raise exceptions.AuthenticationFailed(msg)
-
-        return auth_token
