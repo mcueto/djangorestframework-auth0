@@ -8,7 +8,7 @@ DEFAULTS = {
     'AUTH_COOKIE_NAME': None,  # if you want to use cookie instead of header, set this setting
     'AUTHORIZATION_EXTENSION': False,
     'USERNAME_FIELD': 'sub',
-    'CLIENT_CODE': 'Client_Code',
+    'CLIENT_CODE_HEADER': 'Client_Code',
     'CLIENTS': {},
     'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': True,
     # Handlers

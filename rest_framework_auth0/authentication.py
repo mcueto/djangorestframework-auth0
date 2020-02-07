@@ -57,7 +57,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
         logger.debug("authenticating user using Auth0JSONWebTokenAuthentication")
 
         client_code = request.META.get(
-            "HTTP_" + auth0_api_settings.CLIENT_CODE.upper()
+            "HTTP_" + auth0_api_settings.CLIENT_CODE_HEADER.upper()
         ) or 'default'
 
         logger.debug(
