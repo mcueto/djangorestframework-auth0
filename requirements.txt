@@ -3,3 +3,4 @@ djangorestframework>=1.9.0
 pytest>=3.0.6
 twine
 pyjwt
+cryptography
