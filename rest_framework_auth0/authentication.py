@@ -15,6 +15,7 @@ from rest_framework_auth0.settings import (
     auth0_api_settings,
 )
 from rest_framework_auth0.utils import (
+    get_auth_token,
     get_groups_from_payload,
 )
 from rest_framework.authentication import (
@@ -85,8 +86,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
             raise exceptions.AuthenticationFailed(msg)
 
-        # Code copied from rest_framework_jwt/authentication.py#L28
-        auth_token = self.get_auth_token(request)
+        auth_token = get_auth_token(request)
 
         if auth_token is None:
             return None
