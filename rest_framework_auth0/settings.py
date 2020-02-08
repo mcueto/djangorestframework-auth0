@@ -4,7 +4,7 @@ from rest_framework.settings import APISettings
 USER_SETTINGS = getattr(settings, 'AUTH0', None)
 
 DEFAULTS = {
-    'AUTH_HEADER_PREFIX': 'JWT',
+    'AUTH_HEADER_PREFIX': 'Bearer',
     'AUTH_COOKIE_NAME': None,  # if you want to use cookie instead of header, set this setting
     'AUTHORIZATION_EXTENSION': False,
     'USERNAME_FIELD': 'sub',
