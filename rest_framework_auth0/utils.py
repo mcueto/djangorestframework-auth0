@@ -10,16 +10,69 @@ logger = logging.getLogger(__name__)
 
 
 def validate_authorization_header(auth_header):
+    """
+    Validate if the authorization header has the correct format.
+
+    The authorization header is validated in order to ensure that has:
+    - The correct prefix that match the one in settings(`Bearer` by default)
+    - The num of items on auth_header must be 2(prefix and token)
+
+    """
+    logger.debug(
+        "Validating authorization header"
+    )
+
+    is_valid = False
+
     try:
         auth_header_prefix = force_str(auth_header[0])
-        auth_token = force_str(auth_header[1])
+        # auth_token = force_str(auth_header[1])
+        expected_auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX
 
-        return True
+        # If header prefix is diferent than expected, the user won't log in
+        if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
+            logger.warning(
+                "Invalid header prefix, expected {expected} found {found}".format(
+                    expected=expected_auth_header_prefix.lower(),
+                    found=auth_header_prefix.lower()
+                )
+            )
+
+            msg = _('Invalid Authorization header.')
+
+            raise exceptions.AuthenticationFailed(msg)
+
+        # If token is not present, the user won't log in
+        if len(auth_header) == 1:
+            msg = _('Invalid Authorization header. No credentials provided.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
+            raise exceptions.AuthenticationFailed(msg)
+
+        # If token is "trimmed", the user won't log in
+        elif len(auth_header) > 2:
+            msg = _('Invalid Authorization header. Credentials string '
+                    'should not contain spaces.')
+
+            logger.info(
+                "{message}".format(
+                    message=msg
+                )
+            )
+
+            raise exceptions.AuthenticationFailed(msg)
+
+        is_valid = True
 
     except Exception as e:
-        logger.debug(e)
+        pass
 
-        return None
+    return is_valid
 
 
 # Handlers --------------------------------------------------------------------
@@ -31,72 +84,49 @@ def get_username_from_payload(payload):
 
 # Authorization Utils ---------------------------------------------------------
 def get_auth_token(request):
+    """
+    Return the current request auth token.
+
+    The token is get using HTTP_AUTHORIZATION header on each request, or
+    using a cookie if AUTH_COOKIE_NAME setting is set.
+
+    The header is validated in order to ensure request is formatted as needed.
+
+    A valid authorization header look like(default settings):
+    ```
+    Authorization: Bearer <auth0_generated_token>
+    ```
+    """
     logger.debug(
         "Getting auth token"
     )
 
     auth_header = get_authorization_header(request).split()
+    auth_token = None
 
-    if not validate_authorization_header(auth_header):
+    if validate_authorization_header(auth_header):
+        logger.debug(
+            "Authorization header is valid"
+        )
+        auth_token = force_str(auth_header[1])
+
+    # If authorization header doesn't exists, use a cookie
+    elif not auth_header and auth0_api_settings.AUTH_COOKIE_NAME:
+        logger.warning(
+            "Using Cookie instead of header"
+        )
+        auth_token = request.COOKIES.get(auth0_api_settings.AUTH_COOKIE_NAME)
+
+    else:
         logger.debug(
             "Invalid authorization header"
         )
-
-        return None
-
-    auth_header_prefix = force_str(auth_header[0])
-    auth_token = force_str(auth_header[1])
-
-    expected_auth_header_prefix = auth0_api_settings.AUTH_HEADER_PREFIX
-
-    # If authorization header doesn't exists, use a cookie
-    if not auth_header:
-        if auth0_api_settings.AUTH_COOKIE_NAME:
-            logger.warning(
-                "Using Cookie instead of header"
-            )
-            return request.COOKIES.get(auth0_api_settings.AUTH_COOKIE_NAME)
-        return None
-
-    # If header prefix is diferent than expected, the user won't log in
-    if auth_header_prefix.lower() != expected_auth_header_prefix.lower():
-        logger.warning(
-            "Invalid header prefix, expected {expected} found {found}".format(
-                expected=expected_auth_header_prefix.lower(),
-                found=auth_header_prefix.lower()
-            )
-        )
-
-        return None
-
-    if len(auth_header) == 1:
-        msg = _('Invalid Authorization header. No credentials provided.')
-
-        logger.info(
-            "{message}".format(
-                message=msg
-            )
-        )
-
-        raise exceptions.AuthenticationFailed(msg)
-
-    elif len(auth_header) > 2:
-        msg = _('Invalid Authorization header. Credentials string '
-                'should not contain spaces.')
-
-        logger.info(
-            "{message}".format(
-                message=msg
-            )
-        )
-
-        raise exceptions.AuthenticationFailed(msg)
+        auth_token = None  # Just for maker it clear
 
     return auth_token
 
 
 # Auth0 Metadata --------------------------------------------------------------
-
 def get_app_metadata_from_payload(payload):
     logger.info(
         "Getting app_metadata from payload"
