@@ -28,7 +28,7 @@ def get_username_from_payload(payload):
 
 
 # Authorization Utils ---------------------------------------------------------
-def get_auth_token(self, request):
+def get_auth_token(request):
     logger.debug(
         "Getting auth token"
     )
