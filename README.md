@@ -46,15 +46,15 @@ REST_FRAMEWORK = {
 }
 ```
 
-3. Add your AUTH0_CLIENT_SECRET and AUTH0_CLIENT_ID in your settings.py file -must be the same secret and id than the frontend App-:
+3. Add your CLIENTS setting in your settings.py file:
 ``` python
 AUTH0 = {
   'CLIENTS': {
       'default': {
-          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',  #make sure it's the same string that aud attribute in your payload provides
-          'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_CLIENT_SECRET>',
-          'CLIENT_SECRET_BASE64_ENCODED': True,  # default to True, if you're Auth0 user since December, maybe you should set it to False
-          'AUTH0_ALGORITHM': 'HS256',
+          'AUTH0_CLIENT_ID': '<YOUR_AUTH0_CLIENT_ID>',
+          'AUTH0_AUDIENCE': '<YOUR_AUTH0_CLIENT_AUDIENCE>',
+          'AUTH0_ALGORITHM': 'RS256',  # default used in Auth0 apps
+          'PUBLIC_KEY': '<YOUR_CERTIFICATE_FILE_PUBLIC_KEY>',
       }
   },
   # Management API - For roles and permissions validation
