@@ -228,6 +228,43 @@ def decode_auth_token(client, auth_token):
     return payload
 
 
+def get_client_setting(request):
+    client = None
+
+    client_code = request.META.get(
+        "HTTP_" + auth0_api_settings.CLIENT_CODE_HEADER.upper()
+    ) or 'default'
+
+    logger.debug(
+        "client_code = {client_code}".format(
+            client_code=client_code
+        )
+    )
+
+    if client_code in auth0_api_settings.CLIENTS:
+        client = auth0_api_settings.CLIENTS[client_code]
+
+        logger.debug(
+            "client = {client}".format(
+                client=client
+            )
+        )
+
+    else:
+        msg = _('Invalid Client Code.')
+
+        logger.warning(
+            "{msg}: {client_code}".format(
+                msg=msg,
+                client_code=client_code
+            )
+        )
+
+        raise exceptions.AuthenticationFailed(msg)
+
+    return client
+
+
 # Auth0 Metadata --------------------------------------------------------------
 def get_app_metadata_from_payload(payload):
     logger.info(

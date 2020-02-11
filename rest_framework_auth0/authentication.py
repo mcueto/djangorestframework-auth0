@@ -14,6 +14,7 @@ from rest_framework_auth0.settings import (
 )
 from rest_framework_auth0.utils import (
     get_auth_token,
+    get_client_setting,
     get_groups_from_payload,
     decode_auth_token,
 )
@@ -54,37 +55,7 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         logger.debug("authenticating user using Auth0JSONWebTokenAuthentication")
 
-        client_code = request.META.get(
-            "HTTP_" + auth0_api_settings.CLIENT_CODE_HEADER.upper()
-        ) or 'default'
-
-        logger.debug(
-            "client_code = {client_code}".format(
-                client_code=client_code
-            )
-        )
-
-        if client_code in auth0_api_settings.CLIENTS:
-            client = auth0_api_settings.CLIENTS[client_code]
-
-            logger.debug(
-                "client = {client}".format(
-                    client=client
-                )
-            )
-
-        else:
-            msg = _('Invalid Client Code.')
-
-            logger.warning(
-                "{msg}: {client_code}".format(
-                    msg=msg,
-                    client_code=client_code
-                )
-            )
-
-            raise exceptions.AuthenticationFailed(msg)
-
+        client = get_client_setting(request)
         auth_token = get_auth_token(request)
 
         if auth_token is None:
