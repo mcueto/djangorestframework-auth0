@@ -122,7 +122,7 @@ class HasGroupBasePermission(BasePermission):
             return False
 
 
-class HasGroup(HasRoleBasePermission):
+class HasGroup(HasGroupBasePermission):
     """
     Usage:
 
