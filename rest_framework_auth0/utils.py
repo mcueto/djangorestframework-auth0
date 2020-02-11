@@ -332,6 +332,11 @@ def get_app_metadata_from_user(user):
     return user.get('app_metadata')
 
 
+def get_authorization_metadata_from_user(user):
+    app_metadata = get_app_metadata_from_user(user)
+    return app_metadata.get('authorization')
+
+
 def get_roles_from_payload(payload):
     logger.info(
         "Getting roles from payload"
