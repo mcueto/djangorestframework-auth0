@@ -89,12 +89,6 @@ class HasAdminRole(HasRoleBasePermission):
     role_name = 'admin'
 
 
-class HasRole(HasRoleBasePermission):
-
-    def __init__(self, role_name):
-        self.role_name = role_name
-
-
 # Group based permissions -----------------------------------------------------
 
 class HasGroupBasePermission(BasePermission):
@@ -123,21 +117,6 @@ class HasGroupBasePermission(BasePermission):
             return False
 
 
-class HasGroup(HasGroupBasePermission):
-    """
-    Usage:
-
-    HasAdminGroup = HasGroup('admin')
-
-    Then you can use this permission on your DRF views:
-
-    permission_classes = [HasAdminGroup]
-    """
-
-    def __init__(self, group_name):
-        self.group_name = group_name
-
-
 # Permission based permissions ------------------------------------------------
 
 class HasPermissionBasePermission(BasePermission):
@@ -164,18 +143,3 @@ class HasPermissionBasePermission(BasePermission):
 
         except Exception as e:
             return False
-
-
-class HasPermission(HasPermissionBasePermission):
-    """
-    # Usage:
-    #
-    # HasToDoCreatePermission = HasPermission('create:todos')
-    #
-    # Then you can use this permission on your DRF views:
-    #
-    # permission_classes = [HasToDoCreatePermission]
-    """
-
-    def __init__(self, permission_name):
-        self.permission_name = permission_name
