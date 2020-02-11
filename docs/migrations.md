@@ -1,6 +1,14 @@
 Migrations
 ---
 
+## Migrate from 0.5.3 to 0.8.0
+
+**If you're using the version 0.5.3 -or older- from this package, you'll need to update your Auth0 settings to match the one in README.md**
+- CLIENT settings must be renamed if needed
+- MANAGEMENT_API settings must be added
+- rest-framework-jwt must be uninstalled as it's no longer a requirement for this package.
+
+
 ## Migrate from 0.2.1 to > 0.4.5
 
 **If you're using the version 0.2.1 -or older- from this package, you'll need to update your Auth0 settings**
