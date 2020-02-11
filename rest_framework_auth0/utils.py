@@ -7,6 +7,8 @@ from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework.authentication import get_authorization_header
 from rest_framework_auth0.settings import auth0_api_settings
+from auth0.v3.authentication import GetToken
+from auth0.v3.management import Auth0
 
 logger = logging.getLogger(__name__)
 
@@ -299,6 +301,23 @@ def get_user_metadata_from_payload(payload):
 
 
 # Role validation utils -------------------------------------------------------
+
+def get_management_api_token():
+    domain = auth0_api_settings.MANAGEMENT_API['AUTH0_DOMAIN']
+    client_id = auth0_api_settings.MANAGEMENT_API['AUTH0_CLIENT_ID']
+    client_secret = auth0_api_settings.MANAGEMENT_API['AUTH0_CLIENT_SECRET']
+
+    get_token = GetToken(domain)
+    token = get_token.client_credentials(
+        client_id,
+        client_secret,
+        'https://{domain}/api/v2/'.format(
+            domain=domain
+        )
+    )
+
+    return token['access_token']
+
 
 def get_roles_from_payload(payload):
     logger.info(
