@@ -417,3 +417,57 @@ def validate_group(group, expected_group):
 def validate_group_from_payload(payload, expected_group):
     groups = get_groups_from_payload(payload)
     return expected_group in groups
+
+
+# Permission validation utils -------------------------------------------------
+
+def get_permissions_from_payload(payload):
+    logger.info(
+        "Getting permissions from payload"
+    )
+
+    user_id = get_username_from_payload(payload)
+    user = get_user_from_management_api(user_id=user_id)
+    authorization_metadata = get_authorization_metadata_from_user(user)
+    permissions = authorization_metadata.get('permissions')
+
+    logger.debug(
+        "permissions: {permissions}".format(
+            permissions=permissions
+        )
+    )
+
+    return permissions
+
+
+def validate_permission(permissions, permission):
+    logger.info(
+        "Validating permission"
+    )
+
+    is_permission_valid = permission in permissions
+
+    logger.info(
+        "Is the permission valid: {is_permission_valid}".format(
+            is_permission_valid=is_permission_valid
+        )
+    )
+
+    return is_permission_valid
+
+
+def validate_permission_from_payload(payload, permission):
+    logger.info(
+        "Validating permission from payload"
+    )
+
+    permissions = get_permissions_from_payload(payload)
+
+    logger.debug(
+        "Validating permission {permission} on {permissions}".format(
+            permission=permission,
+            permissions=permissions
+        )
+    )
+
+    return validate_permission(permissions, permission)
