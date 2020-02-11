@@ -66,9 +66,9 @@ AUTH0 = {
 }
 ```
 
-4. Add the `Authorization` Header to all of your REST API request, prefixing JWT to your token:
+4. Add the `Authorization` Header to all of your REST API request, prefixing `Bearer` to your token(default in common REST clients & Postman):
 ```
-Authorization: JWT <AUTH0_GIVEN_TOKEN>
+Authorization: Bearer <AUTH0_GIVEN_TOKEN>
 ```
 5. Use the decorator `@token_required` in all views you want to protect (not_ready_yet)
 
