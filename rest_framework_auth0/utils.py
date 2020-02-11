@@ -328,6 +328,10 @@ def get_user_from_management_api(user_id):
     return auth0.users.get(user_id)
 
 
+def get_app_metadata_from_user(user):
+    return user.get('app_metadata')
+
+
 def get_roles_from_payload(payload):
     logger.info(
         "Getting roles from payload"
