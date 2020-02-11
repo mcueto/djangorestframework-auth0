@@ -9,6 +9,7 @@ from rest_framework_auth0.utils import (
     get_groups_from_payload,
     decode_auth_token,
     validate_role_from_payload,
+    validate_group_from_payload,
 )
 
 logger = logging.getLogger(__name__)
@@ -91,3 +92,46 @@ class HasRole(HasRoleBasePermission):
 
     def __init__(self, role_name):
         self.role_name = role_name
+
+
+# Group based permissions -----------------------------------------------------
+
+class HasGroupBasePermission(BasePermission):
+    group_name = ""
+
+    def get_group_name(self):
+        return self.group_name
+
+    def has_permission(self, request, view):
+
+        if request.method == 'OPTIONS':
+            return True
+
+        client = get_client_setting(request)
+        auth_token = get_auth_token(request)
+
+        try:
+            payload = decode_auth_token(
+                client=client,
+                auth_token=auth_token
+            )
+
+            return validate_group_from_payload(payload, self.get_group_name())
+
+        except Exception as e:
+            return False
+
+
+class HasGroup(HasRoleBasePermission):
+    """
+    Usage:
+
+    HasAdminGroup = HasGroup('admin')
+
+    Then you can use this permission on your DRF views:
+
+    permission_classes = [HasAdminGroup]
+    """
+
+    def __init__(self, group_name):
+        self.group_name = group_name
