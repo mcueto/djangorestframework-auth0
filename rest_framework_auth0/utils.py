@@ -342,7 +342,10 @@ def get_roles_from_payload(payload):
         "Getting roles from payload"
     )
 
-    roles = get_app_metadata_from_payload(payload)['authorization']['roles']
+    user_id = get_username_from_payload(payload)
+    user = get_user_from_management_api(user_id=user_id)
+    authorization_metadata = get_authorization_metadata_from_user(user)
+    roles = authorization_metadata.get('roles')
 
     logger.debug(
         "roles: {roles}".format(
@@ -393,7 +396,10 @@ def get_groups_from_payload(payload):
         "Getting groups from payload"
     )
 
-    groups = get_app_metadata_from_payload(payload)['authorization']['groups']
+    user_id = get_username_from_payload(payload)
+    user = get_user_from_management_api(user_id=user_id)
+    authorization_metadata = get_authorization_metadata_from_user(user)
+    groups = authorization_metadata.get('groups')
 
     logger.debug(
         "Groups: {groups}".format(
