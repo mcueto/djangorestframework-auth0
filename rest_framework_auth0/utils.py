@@ -319,6 +319,15 @@ def get_management_api_token():
     return token['access_token']
 
 
+def get_user_from_management_api(user_id):
+    domain = auth0_api_settings.MANAGEMENT_API['AUTH0_DOMAIN']
+    management_api_token = get_management_api_token()
+
+    auth0 = Auth0(domain, management_api_token)
+
+    return auth0.users.get(user_id)
+
+
 def get_roles_from_payload(payload):
     logger.info(
         "Getting roles from payload"
