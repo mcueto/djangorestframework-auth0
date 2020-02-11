@@ -5,6 +5,9 @@ from rest_framework.permissions import BasePermission
 
 from rest_framework_auth0.utils import (
     get_auth_token,
+    get_client_setting,
+    get_groups_from_payload,
+    decode_auth_token,
     validate_role_from_payload,
 )
 
@@ -16,16 +19,27 @@ class HasRoleBasePermission(BasePermission):
     Allows access only to users that have an specific role.
 
     Allows access only to users that have an specific role in their
-    app_metadata attribute, app_metadata scope required.
+    app_metadata attribute, which is obtained using Auth0 management API +
+    Auth0 authorization extension.
 
-    Example:
+    Example for a ToDos app:
 
     {
       "app_metadata": {
-        "roles": [
-          "<role_name>"
-        ],
-        ...
+        "authorization": {
+            'groups': [
+                'users',
+                'admin'
+            ],
+            'roles': [
+                'ToDos admin']
+            ,
+            'permissions': [
+                'read:todos',
+                'edit:todos',
+                'create:todos'
+            ]
+        }
       },
       "user_metadata": {
         ...
@@ -36,6 +50,12 @@ class HasRoleBasePermission(BasePermission):
       "exp": 1476851700,
       "iat": 1476815700
     }
+
+    NOTE: This payload can be obtained only through Auth0 management API so
+    it not contain the same info as the user token.
+
+    In the old flow you could obtain this using "app_metadata" scope but now
+    this metadata is only available through the current flow(OIDC compliant).
     """
 
     role_name = ""
@@ -48,11 +68,14 @@ class HasRoleBasePermission(BasePermission):
         if request.method == 'OPTIONS':
             return True
 
-        jwt = get_auth_token(request)
+        client = get_client_setting(request)
+        auth_token = get_auth_token(request)
 
         try:
-            # TODO: get payload from request
-            payload = {}
+            payload = decode_auth_token(
+                client=client,
+                auth_token=auth_token
+            )
 
             return validate_role_from_payload(payload, self.get_role_name())
 
