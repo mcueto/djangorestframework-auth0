@@ -10,6 +10,7 @@ from rest_framework_auth0.utils import (
     decode_auth_token,
     validate_role_from_payload,
     validate_group_from_payload,
+    validate_permission_from_payload,
 )
 
 logger = logging.getLogger(__name__)
@@ -135,3 +136,46 @@ class HasGroup(HasGroupBasePermission):
 
     def __init__(self, group_name):
         self.group_name = group_name
+
+
+# Permission based permissions ------------------------------------------------
+
+class HasPermissionBasePermission(BasePermission):
+    permission_name = ""
+
+    def get_permission_name(self):
+        return self.permission_name
+
+    def has_permission(self, request, view):
+
+        if request.method == 'OPTIONS':
+            return True
+
+        client = get_client_setting(request)
+        auth_token = get_auth_token(request)
+
+        try:
+            payload = decode_auth_token(
+                client=client,
+                auth_token=auth_token
+            )
+
+            return validate_permission_from_payload(payload, self.get_permission_name())
+
+        except Exception as e:
+            return False
+
+
+class HasPermission(HasPermissionBasePermission):
+    """
+    # Usage:
+    #
+    # HasToDoCreatePermission = HasPermission('create:todos')
+    #
+    # Then you can use this permission on your DRF views:
+    #
+    # permission_classes = [HasToDoCreatePermission]
+    """
+
+    def __init__(self, permission_name):
+        self.permission_name = permission_name
