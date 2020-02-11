@@ -57,9 +57,12 @@ AUTH0 = {
           'AUTH0_ALGORITHM': 'HS256',
       }
   },
-  'AUTH_HEADER_PREFIX': 'JWT',  # default prefix used by djangorestframework_jwt
-  'AUTHORIZATION_EXTENSION': False,  # default to False
-  'USERNAME_FIELD': 'sub',  # default username field in auth0 token scope to use as token user
+  # Management API - For roles and permissions validation
+  'MANAGEMENT_API': {
+      'AUTH0_DOMAIN': '<YOUR_AUTH0_DOMAIN>',
+      'AUTH0_CLIENT_ID': '<YOUR_AUTH0_M2M_API_MANAGEMENT_CLIENT_ID>',
+      'AUTH0_CLIENT_SECRET': '<YOUR_AUTH0_M2M_API_MANAGEMENT_CLIENT_SECRET>'
+  },
 }
 ```
 
