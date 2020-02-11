@@ -1,5 +1,7 @@
 """DjangoRestFramework Auth0 Utils."""
+import base64
 import logging
+import jwt
 from django.utils.encoding import force_str
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
@@ -124,6 +126,106 @@ def get_auth_token(request):
         auth_token = None  # Just for maker it clear
 
     return auth_token
+
+
+def decode_auth_token(client, auth_token):
+    payload = None
+
+    try:
+
+        # RS256 Related configurations
+        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+            logger.debug(
+                "Using RS256 algorithm"
+            )
+
+            payload = jwt.decode(
+                auth_token,
+                client['PUBLIC_KEY'],
+                audience=client['AUTH0_AUDIENCE'],
+                algorithm=client['AUTH0_ALGORITHM'],
+            )
+
+        elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
+            client_secret = None
+
+            logger.debug(
+                "Using HS256 algorithm"
+            )
+
+            if client['CLIENT_SECRET_BASE64_ENCODED']:
+                logger.debug(
+                    "Client secret is base64 encoded"
+                )
+
+                client_secret = base64.b64decode(
+                    client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
+                )
+
+            else:
+                logger.debug(
+                    "Client secret is not base64 encoded"
+                )
+
+                client_secret = client['AUTH0_CLIENT_SECRET']
+
+            logger.debug(
+                "client_secret = {client_secret}".format(
+                    client_secret=client_secret
+                )
+            )
+
+            payload = jwt.decode(
+                auth_token,
+                client_secret,
+                audience=client['AUTH0_AUDIENCE'],
+                algorithm=client['AUTH0_ALGORITHM'],
+            )
+
+        else:
+            msg = _('Error decoding signature.')
+            raise exceptions.AuthenticationFailed(msg)
+
+        logger.debug(
+            "payload = {payload}".format(
+                payload=payload
+            )
+        )
+
+    except jwt.ExpiredSignature:
+        msg = _('Signature has expired.')
+
+        logger.info(
+            "{message}".format(
+                message=msg
+            )
+        )
+
+        raise exceptions.AuthenticationFailed(msg)
+
+    except jwt.DecodeError:
+        msg = _('Error decoding signature.')
+
+        logger.info(
+            "{message}".format(
+                message=msg
+            )
+        )
+
+        raise exceptions.AuthenticationFailed(msg)
+
+    except jwt.InvalidTokenError:
+        msg = _('Invalid token.')
+
+        logger.info(
+            "{message}".format(
+                message=msg
+            )
+        )
+
+        raise exceptions.AuthenticationFailed()
+
+    return payload
 
 
 # Auth0 Metadata --------------------------------------------------------------
