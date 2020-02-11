@@ -11,6 +11,12 @@ DEFAULTS = {
     'CLIENT_CODE_HEADER': 'Client_Code',
     'CLIENTS': {},
     'REPLACE_PIPE_FOR_DOTS_IN_USERNAME': True,
+    # Management API - For roles and permissions validation
+    'MANAGEMENT_API': {
+        'AUTH0_DOMAIN': None,
+        'AUTH0_CLIENT_ID': None,
+        'AUTH0_CLIENT_SECRET': None
+    },
     # Handlers
     'GET_USERNAME_HANDLER':
     'rest_framework_auth0.utils.get_username_from_payload',

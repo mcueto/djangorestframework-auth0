@@ -1,5 +1,3 @@
-import base64
-import jwt
 import logging
 
 from django.contrib.auth.backends import (
@@ -16,7 +14,9 @@ from rest_framework_auth0.settings import (
 )
 from rest_framework_auth0.utils import (
     get_auth_token,
+    get_client_setting,
     get_groups_from_payload,
+    decode_auth_token,
 )
 from rest_framework.authentication import (
     BaseAuthentication,
@@ -55,134 +55,16 @@ class Auth0JSONWebTokenAuthentication(BaseAuthentication, RemoteUserBackend):
 
         logger.debug("authenticating user using Auth0JSONWebTokenAuthentication")
 
-        client_code = request.META.get(
-            "HTTP_" + auth0_api_settings.CLIENT_CODE_HEADER.upper()
-        ) or 'default'
-
-        logger.debug(
-            "client_code = {client_code}".format(
-                client_code=client_code
-            )
-        )
-
-        if client_code in auth0_api_settings.CLIENTS:
-            client = auth0_api_settings.CLIENTS[client_code]
-
-            logger.debug(
-                "client = {client}".format(
-                    client=client
-                )
-            )
-
-        else:
-            msg = _('Invalid Client Code.')
-
-            logger.warning(
-                "{msg}: {client_code}".format(
-                    msg=msg,
-                    client_code=client_code
-                )
-            )
-
-            raise exceptions.AuthenticationFailed(msg)
-
+        client = get_client_setting(request)
         auth_token = get_auth_token(request)
 
         if auth_token is None:
             return None
 
-        try:
-            # RS256 Related configurations
-            if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
-                logger.debug(
-                    "Using RS256 algorithm"
-                )
-
-                payload = jwt.decode(
-                    auth_token,
-                    client['PUBLIC_KEY'],
-                    audience=client['AUTH0_AUDIENCE'],
-                    algorithm=client['AUTH0_ALGORITHM'],
-                )
-
-            elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
-                client_secret = None
-
-                logger.debug(
-                    "Using HS256 algorithm"
-                )
-
-                if client['CLIENT_SECRET_BASE64_ENCODED']:
-                    logger.debug(
-                        "Client secret is base64 encoded"
-                    )
-
-                    client_secret = base64.b64decode(
-                        client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
-                    )
-
-                else:
-                    logger.debug(
-                        "Client secret is not base64 encoded"
-                    )
-
-                    client_secret = client['AUTH0_CLIENT_SECRET']
-
-                logger.debug(
-                    "client_secret = {client_secret}".format(
-                        client_secret=client_secret
-                    )
-                )
-
-                payload = jwt.decode(
-                    auth_token,
-                    client_secret,
-                    audience=client['AUTH0_AUDIENCE'],
-                    algorithm=client['AUTH0_ALGORITHM'],
-                )
-
-            else:
-                msg = _('Error decoding signature.')
-                raise exceptions.AuthenticationFailed(msg)
-
-            logger.debug(
-                "payload = {payload}".format(
-                    payload=payload
-                )
-            )
-
-        except jwt.ExpiredSignature:
-            msg = _('Signature has expired.')
-
-            logger.info(
-                "{message}".format(
-                    message=msg
-                )
-            )
-
-            raise exceptions.AuthenticationFailed(msg)
-
-        except jwt.DecodeError:
-            msg = _('Error decoding signature.')
-
-            logger.info(
-                "{message}".format(
-                    message=msg
-                )
-            )
-
-            raise exceptions.AuthenticationFailed(msg)
-
-        except jwt.InvalidTokenError:
-            msg = _('Invalid token.')
-
-            logger.info(
-                "{message}".format(
-                    message=msg
-                )
-            )
-
-            raise exceptions.AuthenticationFailed()
+        payload = decode_auth_token(
+            client=client,
+            auth_token=auth_token
+        )
 
         # Add request param to authenticated_credentials() call
         user = self.authenticate_credentials(request, payload)

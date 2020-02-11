@@ -1,10 +1,14 @@
 """DjangoRestFramework Auth0 Utils."""
+import base64
 import logging
+import jwt
 from django.utils.encoding import force_str
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework.authentication import get_authorization_header
 from rest_framework_auth0.settings import auth0_api_settings
+from auth0.v3.authentication import GetToken
+from auth0.v3.management import Auth0
 
 logger = logging.getLogger(__name__)
 
@@ -126,6 +130,143 @@ def get_auth_token(request):
     return auth_token
 
 
+def decode_auth_token(client, auth_token):
+    payload = None
+
+    try:
+
+        # RS256 Related configurations
+        if(client['AUTH0_ALGORITHM'].upper() == "RS256"):
+            logger.debug(
+                "Using RS256 algorithm"
+            )
+
+            payload = jwt.decode(
+                auth_token,
+                client['PUBLIC_KEY'],
+                audience=client['AUTH0_AUDIENCE'],
+                algorithm=client['AUTH0_ALGORITHM'],
+            )
+
+        elif(client['AUTH0_ALGORITHM'].upper() == "HS256"):
+            client_secret = None
+
+            logger.debug(
+                "Using HS256 algorithm"
+            )
+
+            if client['CLIENT_SECRET_BASE64_ENCODED']:
+                logger.debug(
+                    "Client secret is base64 encoded"
+                )
+
+                client_secret = base64.b64decode(
+                    client['AUTH0_CLIENT_SECRET'].replace("_", "/").replace("-", "+")
+                )
+
+            else:
+                logger.debug(
+                    "Client secret is not base64 encoded"
+                )
+
+                client_secret = client['AUTH0_CLIENT_SECRET']
+
+            logger.debug(
+                "client_secret = {client_secret}".format(
+                    client_secret=client_secret
+                )
+            )
+
+            payload = jwt.decode(
+                auth_token,
+                client_secret,
+                audience=client['AUTH0_AUDIENCE'],
+                algorithm=client['AUTH0_ALGORITHM'],
+            )
+
+        else:
+            msg = _('Error decoding signature.')
+            raise exceptions.AuthenticationFailed(msg)
+
+        logger.debug(
+            "payload = {payload}".format(
+                payload=payload
+            )
+        )
+
+    except jwt.ExpiredSignature:
+        msg = _('Signature has expired.')
+
+        logger.info(
+            "{message}".format(
+                message=msg
+            )
+        )
+
+        raise exceptions.AuthenticationFailed(msg)
+
+    except jwt.DecodeError:
+        msg = _('Error decoding signature.')
+
+        logger.info(
+            "{message}".format(
+                message=msg
+            )
+        )
+
+        raise exceptions.AuthenticationFailed(msg)
+
+    except jwt.InvalidTokenError:
+        msg = _('Invalid token.')
+
+        logger.info(
+            "{message}".format(
+                message=msg
+            )
+        )
+
+        raise exceptions.AuthenticationFailed()
+
+    return payload
+
+
+def get_client_setting(request):
+    client = None
+
+    client_code = request.META.get(
+        "HTTP_" + auth0_api_settings.CLIENT_CODE_HEADER.upper()
+    ) or 'default'
+
+    logger.debug(
+        "client_code = {client_code}".format(
+            client_code=client_code
+        )
+    )
+
+    if client_code in auth0_api_settings.CLIENTS:
+        client = auth0_api_settings.CLIENTS[client_code]
+
+        logger.debug(
+            "client = {client}".format(
+                client=client
+            )
+        )
+
+    else:
+        msg = _('Invalid Client Code.')
+
+        logger.warning(
+            "{msg}: {client_code}".format(
+                msg=msg,
+                client_code=client_code
+            )
+        )
+
+        raise exceptions.AuthenticationFailed(msg)
+
+    return client
+
+
 # Auth0 Metadata --------------------------------------------------------------
 def get_app_metadata_from_payload(payload):
     logger.info(
@@ -161,12 +302,50 @@ def get_user_metadata_from_payload(payload):
 
 # Role validation utils -------------------------------------------------------
 
+def get_management_api_token():
+    domain = auth0_api_settings.MANAGEMENT_API['AUTH0_DOMAIN']
+    client_id = auth0_api_settings.MANAGEMENT_API['AUTH0_CLIENT_ID']
+    client_secret = auth0_api_settings.MANAGEMENT_API['AUTH0_CLIENT_SECRET']
+
+    get_token = GetToken(domain)
+    token = get_token.client_credentials(
+        client_id,
+        client_secret,
+        'https://{domain}/api/v2/'.format(
+            domain=domain
+        )
+    )
+
+    return token['access_token']
+
+
+def get_user_from_management_api(user_id):
+    domain = auth0_api_settings.MANAGEMENT_API['AUTH0_DOMAIN']
+    management_api_token = get_management_api_token()
+
+    auth0 = Auth0(domain, management_api_token)
+
+    return auth0.users.get(user_id)
+
+
+def get_app_metadata_from_user(user):
+    return user.get('app_metadata')
+
+
+def get_authorization_metadata_from_user(user):
+    app_metadata = get_app_metadata_from_user(user)
+    return app_metadata.get('authorization')
+
+
 def get_roles_from_payload(payload):
     logger.info(
         "Getting roles from payload"
     )
 
-    roles = get_app_metadata_from_payload(payload)['authorization']['roles']
+    user_id = get_username_from_payload(payload)
+    user = get_user_from_management_api(user_id=user_id)
+    authorization_metadata = get_authorization_metadata_from_user(user)
+    roles = authorization_metadata.get('roles')
 
     logger.debug(
         "roles: {roles}".format(
@@ -217,7 +396,10 @@ def get_groups_from_payload(payload):
         "Getting groups from payload"
     )
 
-    groups = get_app_metadata_from_payload(payload)['authorization']['groups']
+    user_id = get_username_from_payload(payload)
+    user = get_user_from_management_api(user_id=user_id)
+    authorization_metadata = get_authorization_metadata_from_user(user)
+    groups = authorization_metadata.get('groups')
 
     logger.debug(
         "Groups: {groups}".format(
@@ -235,3 +417,57 @@ def validate_group(group, expected_group):
 def validate_group_from_payload(payload, expected_group):
     groups = get_groups_from_payload(payload)
     return expected_group in groups
+
+
+# Permission validation utils -------------------------------------------------
+
+def get_permissions_from_payload(payload):
+    logger.info(
+        "Getting permissions from payload"
+    )
+
+    user_id = get_username_from_payload(payload)
+    user = get_user_from_management_api(user_id=user_id)
+    authorization_metadata = get_authorization_metadata_from_user(user)
+    permissions = authorization_metadata.get('permissions')
+
+    logger.debug(
+        "permissions: {permissions}".format(
+            permissions=permissions
+        )
+    )
+
+    return permissions
+
+
+def validate_permission(permissions, permission):
+    logger.info(
+        "Validating permission"
+    )
+
+    is_permission_valid = permission in permissions
+
+    logger.info(
+        "Is the permission valid: {is_permission_valid}".format(
+            is_permission_valid=is_permission_valid
+        )
+    )
+
+    return is_permission_valid
+
+
+def validate_permission_from_payload(payload, permission):
+    logger.info(
+        "Validating permission from payload"
+    )
+
+    permissions = get_permissions_from_payload(payload)
+
+    logger.debug(
+        "Validating permission {permission} on {permissions}".format(
+            permission=permission,
+            permissions=permissions
+        )
+    )
+
+    return validate_permission(permissions, permission)
