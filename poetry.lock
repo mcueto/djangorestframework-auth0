@@ -103,7 +103,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "0.3.1"
 
 [metadata]
-content-hash = "4353b5daf5fd2f8ebf6dfff28916a402180a55927ce245932e26cee4f3d73d6a"
+content-hash = "03c58e576dc12f29b94046506537d52f3010c6a80ea3ad9796a5c65316b3ad23"
 lock-version = "1.0"
 python-versions = "3.6"
 
