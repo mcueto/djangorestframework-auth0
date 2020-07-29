@@ -10,6 +10,7 @@ python = "3.6"
 django = ">2.2"
 pyjwt = ">=1.7"
 cryptography = ">=3"
+auth0-python = ">=3.12"
 
 [tool.poetry.dev-dependencies]
 
