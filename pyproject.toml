@@ -4,6 +4,7 @@ version = "0.6.0"
 description = "This library let you to authenticate an specific user on DRF based on the JWT Token returned by Auth0 Javascript libraries."
 authors = ["Marcelo Cueto <cueto@live.cl>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "3.6"
