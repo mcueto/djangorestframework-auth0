@@ -1,10 +1,27 @@
 [tool.poetry]
 name = "rest-framework-auth0"
-version = "0.6.1"
+version = "0.6.2"
 description = "This library let you to authenticate an specific user on DRF based on the JWT Token returned by Auth0 Javascript libraries."
 authors = ["Marcelo Cueto <cueto@live.cl>"]
 license = "MIT"
 readme = "README.md"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Framework :: Django :: 2.2",
+  "Framework :: Django :: 3.0",
+  "Framework :: Django :: 3.1",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Internet :: WWW/HTTP"
+]
 
 [tool.poetry.dependencies]
 python = "3.6"
