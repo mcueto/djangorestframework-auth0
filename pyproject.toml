@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rest-framework-auth0"
-version = "0.6.2"
+version = "0.6.3"
 description = "This library let you to authenticate an specific user on DRF based on the JWT Token returned by Auth0 Javascript libraries."
 authors = ["Marcelo Cueto <cueto@live.cl>"]
 license = "MIT"
