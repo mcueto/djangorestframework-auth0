@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "3.6"
+python = ">=3.6"
 django = ">2.2"
 pyjwt = ">=1.7"
 cryptography = ">=3"
